@@ -17,17 +17,23 @@ const UserSchema = new mongoose.Schema({
         type: String,
         required: true
     },
-    
+    challenges: [
+        {
+            type: String
+        }
+    ]
 }, { timestamps: true });
 
 UserSchema.pre("save", async function (next) {
-    this.password = bcrypt.hash(this.password, 10);
-
+    if (this.isModified("password")) {
+        this.password = await bcrypt.hash(this.password, 10);
+    }
+    
     next()
 })
 
-UserSchema.methods.isPasswordCorrect = function(password) {
-    return bcrypt.compare(password, this.password);
+UserSchema.methods.isPasswordCorrect = async function(password) {
+    return await bcrypt.compare(password, this.password);
 }
 
 UserSchema.methods.generateToken = function() {

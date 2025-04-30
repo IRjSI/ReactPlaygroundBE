@@ -14,10 +14,6 @@ app.use(cors());
 app.use(express.urlencoded());
 app.use(express.json())
 
-app.get('/health-check', (req,res) => {
-
-})
-
 app.use('/api/v1/user', userRouter);
 
 app.listen(4000, () => console.log('listening'))
