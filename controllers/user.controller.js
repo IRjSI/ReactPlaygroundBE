@@ -58,9 +58,11 @@ const userLogin = async (req,res) => {
                 success: false
             })
         }
+
+        const token = await existingUser.generateToken();
         
         return res.status(200).json({
-            data: existingUser,
+            data: token,
             message: "User found",
             success: true
         })
@@ -83,21 +85,28 @@ const addChallenges = async (req,res) => {
             })
         }
 
-        const updatedUser = await UserModel.findByIdAndUpdate(
-            req.userId,
-            { $push: { challenges: challenge } },
-            { new: true }
-        );
-        
-        if (!updatedUser) {
-            return res.status(400).json({
-                message: "error adding challenge",
+        const user = await UserModel.findById(req.user?._id)
+        if (!user) {
+            return res.status(404).json({
+                message: "User not found",
                 success: false
-            })
+            });
         }
+        
+        // to add a challenge only once
+        if (user.challenges.includes(challenge)) {
+            return res.status(200).json({
+                message: "Already added",
+                success: true
+            });
+        }   
+        if (!user.challenges.includes(challenge)) {
+            user.challenges.push(challenge);
+            await user.save();
+        }   
 
         return res.status(200).json({
-            data: updatedUser,
+            data: user,
             message: "Challenge added",
             success: true
         })
@@ -110,9 +119,9 @@ const addChallenges = async (req,res) => {
     }
 }
 
-const getNumberOfChallenges = async (req,res) => {
+const getChallenges = async (req,res) => {
     try {
-        const challenges = await UserModel.findById(req.userId).select("challenges");
+        const challenges = await UserModel.findById(req.user?._id).select("challenges");
         if (!challenges) {
             return res.status(400).json({
                 message: "challenges does not exists",
@@ -138,6 +147,6 @@ export {
     userRegister,
     userLogin,
     addChallenges,
-    getNumberOfChallenges,
+    getChallenges,
 
 }

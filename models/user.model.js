@@ -21,7 +21,10 @@ const UserSchema = new mongoose.Schema({
         {
             type: String
         }
-    ]
+    ],
+    token: {
+        type: String
+    }
 }, { timestamps: true });
 
 UserSchema.pre("save", async function (next) {
