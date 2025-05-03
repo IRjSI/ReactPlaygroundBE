@@ -143,10 +143,34 @@ const getChallenges = async (req,res) => {
     }
 }
 
+const getUserInfo = async (req,res) => {
+    try {        
+        const user = UserModel.findById(req.user?._id);
+        if (!user) {
+            return res.status(404).json({
+                message: 'user not found',
+                success: false
+            })
+        }
+
+        res.status(200).json({
+            data: user,
+            message: 'user found',
+            success: true
+        })
+    } catch (error) {
+        console.log(error)
+        res.status(500).json({
+            message: 'internal server error',
+            success: false
+        })
+    }
+}
+
 export {
     userRegister,
     userLogin,
     addChallenges,
     getChallenges,
-
+    getUserInfo
 }
