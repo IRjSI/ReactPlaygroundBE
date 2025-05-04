@@ -5,7 +5,7 @@
   "type": "module",
   "scripts": {
     "build": "echo \"No build step defined\"",
-    "start": "node src/app.js",
+    "start": "node app.js",
     "dev": "nodemon app.js"
   },
   "keywords": [],
