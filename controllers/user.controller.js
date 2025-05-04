@@ -1,3 +1,4 @@
+import ChallengeModel from "../models/challenge.model.js";
 import UserModel from "../models/user.model.js";
 
 const userRegister = async (req,res) => {
@@ -75,77 +76,9 @@ const userLogin = async (req,res) => {
     }
 }
 
-const addChallenges = async (req,res) => {
-    try {
-        const { challenge } = req.body;
-        if (!challenge) {
-            return res.status(400).json({
-                message: "challenge required",
-                success: false
-            })
-        }
-
-        const user = await UserModel.findById(req.user?._id)
-        if (!user) {
-            return res.status(404).json({
-                message: "User not found",
-                success: false
-            });
-        }
-        
-        // to add a challenge only once
-        if (user.challenges.includes(challenge)) {
-            return res.status(200).json({
-                message: "Already added",
-                success: true
-            });
-        }   
-        if (!user.challenges.includes(challenge)) {
-            user.challenges.push(challenge);
-            await user.save();
-        }   
-
-        return res.status(200).json({
-            data: user,
-            message: "Challenge added",
-            success: true
-        })
-    } catch (error) {
-        console.log(error);
-        return res.status(500).json({
-            message: "Internal Server Error",
-            success: false
-        });
-    }
-}
-
-const getChallenges = async (req,res) => {
-    try {
-        const challenges = await UserModel.findById(req.user?._id).select("challenges");
-        if (!challenges) {
-            return res.status(400).json({
-                message: "challenges does not exists",
-                success: false
-            })
-        }
-
-        return res.status(200).json({
-            data: challenges,
-            message: "Challenges found",
-            success: true
-        })
-    } catch (error) {
-        console.log(error);
-        return res.status(500).json({
-            message: "Internal Server Error",
-            success: false
-        });
-    }
-}
-
 const getUserInfo = async (req,res) => {
     try {        
-        const user = UserModel.findById(req.user?._id);
+        const user = await UserModel.findById(req.user?._id);
         if (!user) {
             return res.status(404).json({
                 message: 'user not found',
@@ -170,7 +103,5 @@ const getUserInfo = async (req,res) => {
 export {
     userRegister,
     userLogin,
-    addChallenges,
-    getChallenges,
     getUserInfo
 }

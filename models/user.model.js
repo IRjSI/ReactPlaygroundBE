@@ -19,7 +19,8 @@ const UserSchema = new mongoose.Schema({
     },
     challenges: [
         {
-            type: String
+            type: mongoose.Schema.Types.ObjectId,
+            ref: 'challenge'
         }
     ],
     token: {
