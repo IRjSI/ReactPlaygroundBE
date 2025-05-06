@@ -23,6 +23,12 @@ const UserSchema = new mongoose.Schema({
             ref: 'challenge'
         }
     ],
+    solutions: [
+        {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: 'solution'
+        }
+    ],
     token: {
         type: String
     }
