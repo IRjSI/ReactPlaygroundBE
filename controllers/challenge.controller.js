@@ -102,8 +102,41 @@ const addChallenges = async (req,res) => {
     }
 }
 
+const createChallenge = async (req,res) => {
+    try {
+        const { statement, difficulty, solution } = req.body;
+        if (!statement) {
+            return res.status(400).json({
+                message: "challenge required",
+                success: false
+            })
+        }
+
+        const challenge = await ChallengeModel.create({
+            statement,
+            difficulty,
+            solution
+        })
+        if (!challenge) {
+            return res.status(400).json({
+                message: "challenge not created",
+                success: false
+            })
+        }
+
+        res.status(201).json({
+            data: challenge,
+            message: "challenge created",
+            success: false
+        })
+    } catch (error) {
+        
+    }
+}
+
 export {
     getAllChallenges,
     getUserChallenges,
-    addChallenges
+    addChallenges,
+    createChallenge
 }
