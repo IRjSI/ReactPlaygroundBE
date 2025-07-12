@@ -1,6 +1,6 @@
 import express from "express";
 import { verifyToken } from "../middlewares/auth.middleware.js";
-import { addSolution, getSolutions } from "../controllers/user.controller.js";
+import { addSolution, getSolutions } from "../controllers/solution.controller.js";
 
 const solutionRouter = express.Router();
 

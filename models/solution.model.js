@@ -1,14 +1,19 @@
 import mongoose from "mongoose";
 
 const SolutionSchema = new mongoose.Schema({
+    user: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'user'
+    },
     statement: {
         type: String,
         required: true,
-        unique: true
+        unique: false
     },
     solution: {
         type: String,
-        required: true
+        required: true,
+        unique: false
     }
 })
 

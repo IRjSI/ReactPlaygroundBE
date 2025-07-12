@@ -4,9 +4,9 @@ import UserModel from "../models/user.model.js"
 const addSolution = async (req,res) => {
     try {
         const { solution, statement } = req.body
-        if (!solution) {
+        if (!solution || !statement) {
             return res.status(400).json({
-                message: 'Solution is required',
+                message: 'Solution/statement is required',
                 success: false
             })
         }
@@ -18,8 +18,22 @@ const addSolution = async (req,res) => {
                 success: false
             })
         }
+        
+        const solutionAlready = await SolutionModel.findOne({ 
+            user: user?._id,
+            statement
+         });
+        if (solutionAlready) {
+            solutionAlready.solution = solution;
+            await solutionAlready.save();
+            return res.status(200).json({
+                message: 'solution updated',
+                success: true
+            });
+        }
 
         const solutionInDb = await SolutionModel.create({
+            user,
             statement,
             solution
         })

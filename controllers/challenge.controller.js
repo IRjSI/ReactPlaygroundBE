@@ -104,7 +104,7 @@ const addChallenges = async (req,res) => {
 
 const createChallenge = async (req,res) => {
     try {
-        const { statement, difficulty, solution } = req.body;
+        const { statement, difficulty, solution, testcases } = req.body;
         if (!statement) {
             return res.status(400).json({
                 message: "challenge required",
@@ -115,7 +115,8 @@ const createChallenge = async (req,res) => {
         const challenge = await ChallengeModel.create({
             statement,
             difficulty,
-            solution
+            solution,
+            testcases
         })
         if (!challenge) {
             return res.status(400).json({
@@ -130,7 +131,11 @@ const createChallenge = async (req,res) => {
             success: false
         })
     } catch (error) {
-        
+        console.log(error);
+        return res.status(500).json({
+            message: "Internal Server Error",
+            success: false
+        });
     }
 }
 
