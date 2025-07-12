@@ -3,6 +3,7 @@ import SolutionModel from "../models/solution.model.js";
 import UserModel from "../models/user.model.js";
 
 const userRegister = async (req,res) => {
+    // to create a new user
     try {
         const { username, email, password } = req.body;
         if (!username || !email || !password) {
@@ -46,6 +47,7 @@ const userRegister = async (req,res) => {
 }
 
 const userLogin = async (req,res) => {
+    // to login an existing user
     try {
         const { username, password } = req.body;
         if (!username || !password) {
@@ -80,6 +82,7 @@ const userLogin = async (req,res) => {
 }
 
 const getUserInfo = async (req,res) => {
+    // to get the current user
     try {        
         const user = await UserModel.findById(req.user?._id);
         if (!user) {

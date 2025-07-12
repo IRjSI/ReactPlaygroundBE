@@ -2,6 +2,7 @@ import ChallengeModel from "../models/challenge.model.js"
 import UserModel from "../models/user.model.js";
 
 const getAllChallenges = async (req,res) => {
+    // to get all the challenges in the database to display on the site
     try {
         const challenges = await ChallengeModel.find();
         if (!challenges) {
@@ -26,7 +27,9 @@ const getAllChallenges = async (req,res) => {
 }
 
 const getUserChallenges = async (req,res) => {
+    // to get all the challenges the user have submitted(correct ones)
     try {
+        // populate with challenge statement, this will help in tagging questions with 'solved' or 'unsolved'
         const challenges = await UserModel.findById(req.user?._id).populate('challenges', 'statement');
         if (!challenges) {
             return res.status(404).json({
@@ -50,6 +53,7 @@ const getUserChallenges = async (req,res) => {
 }
 
 const addChallenges = async (req,res) => {
+    // to add a challenge to the user's table
     try {
         const { statement } = req.body;
         if (!statement) {
@@ -103,6 +107,7 @@ const addChallenges = async (req,res) => {
 }
 
 const createChallenge = async (req,res) => {
+    // to create a challenge
     try {
         const { statement, difficulty, solution, testcases } = req.body;
         if (!statement) {
