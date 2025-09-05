@@ -1,5 +1,3 @@
-import ChallengeModel from "../models/challenge.model.js";
-import SolutionModel from "../models/solution.model.js";
 import UserModel from "../models/user.model.js";
 
 const userRegister = async (req,res) => {
