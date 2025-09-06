@@ -6,20 +6,26 @@
   "scripts": {
     "build": "echo \"No build step defined\"",
     "start": "node app.js",
-    "dev": "nodemon app.js"
+    "dev": "concurrently \"nodemon app.js\" \"nodemon workers/solutionWorker.js\""
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "description": "",
   "dependencies": {
+    "@babel/standalone": "^7.28.4",
     "bcrypt": "^5.1.1",
+    "concurrently": "^9.2.1",
     "cors": "^2.8.5",
     "dotenv": "^16.5.0",
     "express": "^5.1.0",
+    "jsdom": "^26.1.0",
     "jsonwebtoken": "^9.0.2",
     "mongoose": "^8.14.0",
     "nodemon": "^3.1.10",
-    "redis": "^5.8.2"
+    "puppeteer": "^24.19.0",
+    "redis": "^5.8.2",
+    "socket.io": "^4.8.1",
+    "socketio": "^1.0.0"
   }
 }

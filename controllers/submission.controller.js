@@ -5,7 +5,6 @@ const checkSolution = async (req, res) => {
   const solutionId = `solution:${Date.now()}`;
 
   await enqueueSolution(solutionId, iframeDoc);
-
   return res.json({ solutionId });
 };
 
