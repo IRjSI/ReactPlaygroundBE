@@ -50,7 +50,7 @@ io.on("connection", (socket) => {
 
     socket.on("disconnect", () => {
         for (const [solutionId, sId] of clients) {
-            if (sId === socket.id) clients.delete(solutionId);
+          if (sId === socket.id) clients.delete(solutionId);
         }
     });
 });

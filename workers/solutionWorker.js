@@ -2,8 +2,12 @@ import { createClient } from "redis";
 import puppeteer from "puppeteer";
 import * as Babel from '@babel/standalone';
 
-const subscriber = createClient();
-const redis = createClient();
+const subscriber = createClient({
+  url: process.env.REDIS_URL
+});
+const redis = createClient({
+  url: process.env.REDIS_URL
+});
 
 await subscriber.connect();
 await redis.connect();

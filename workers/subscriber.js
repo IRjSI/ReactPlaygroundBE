@@ -1,9 +1,13 @@
 import { createClient } from "redis";
 
-const redis = createClient();
+const redis = createClient({
+  url: process.env.REDIS_URL
+});
 await redis.connect();
 
-const sub = redis.duplicate();
+const sub = redis.duplicate({
+  url: process.env.REDIS_URL
+});
 await sub.connect();
 
 async function subscribeToResults(callback) {
