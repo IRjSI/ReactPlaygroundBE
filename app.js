@@ -38,7 +38,7 @@ const server = createServer(app);
 
 // Attach socket.io
 const io = new Server(server, {
-  cors: { origin: "http://localhost:5173" }
+  cors: { origin: ["http://localhost:5173", "https://reactpg.vercel.app", "https://react-playground-git-solution-rjss-projects.vercel.app"] }
 });
 
 const clients = new Map();
