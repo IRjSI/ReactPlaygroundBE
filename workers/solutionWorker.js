@@ -14,12 +14,15 @@ await redis.connect();
 
 await subscriber.subscribe("solution_channel", async (message) => {
   const { solutionId } = JSON.parse(message);
-
+  console.log("reached solution worker with:: ", solutionId)
+  
   // Pop user submission from queue
   const solutionData = await redis.lPop("solutions_queue");
   if (!solutionData) return;
-
+  console.log("popped the data from queue") // mostly this is the issue
+  
   const { iframeDoc } = JSON.parse(solutionData); // code is JSX/React source
+  console.log("loaded the iframe::", iframeDoc)
 
   // Compile JSX → plain JS
   const compiledCode = Babel.transform(iframeDoc, { presets: ['react'] }).code;
@@ -47,11 +50,14 @@ await subscriber.subscribe("solution_channel", async (message) => {
   // Launch headless browser
   const browser = await puppeteer.launch({ headless: true });
   const page = await browser.newPage();
+  console.log("setup done")
 
   // Set HTML content
   await page.setContent(html, { waitUntil: 'domcontentloaded' });
 
   let isValid = false;
+
+  console.log("reached validity check")
 
   try {
     // Wait for the button to appear
@@ -75,7 +81,9 @@ await subscriber.subscribe("solution_channel", async (message) => {
     console.error("Validation error:", err.message);
   }
 
+  console.log("browser closing")
   await browser.close();
+  console.log("browser closed")
 
   // Publish result back to Redis
   await redis.publish("results_channel", JSON.stringify({
