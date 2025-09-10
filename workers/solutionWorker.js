@@ -82,4 +82,6 @@ await subscriber.subscribe("solution_channel", async (message) => {
     solutionId,
     result: isValid ? "valid" : "invalid"
   }));
+
+  console.log("done checking")
 });

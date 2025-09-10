@@ -15,6 +15,8 @@ async function subscribeToResults(callback) {
     const { solutionId, result } = JSON.parse(message);
     callback(solutionId, result);
   });
+
+  console.log("done subscribing")
 }
 
 export { subscribeToResults };
