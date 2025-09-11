@@ -22,3 +22,12 @@ That means:
 - In dev, you can use concurrently or nodemon locally to run multiple processes in one terminal.
 - In prod on Render, you cannot run both app.js and workers/solutionWorker.js in a single service.
 
+### BUT
+Since Render doesn't provide free background worker service, we'll start both in single file.
+```js
+import "./workers/solutionWorker.js"; 
+```
+By adding this line in `app.js`
+
+### Also 
+Do not use `puppeteer-core` as it doesn't come with chrome by default, so use `puppeteer`

@@ -61,7 +61,18 @@ await subscriber.subscribe("solution_channel", async (message) => {
   `;
 
   // Launch headless browser
-  const browser = await puppeteer.launch({ headless: true });
+  const browser = await puppeteer.launch({
+    headless: true,
+    args: [
+      "--no-sandbox",
+      "--disable-setuid-sandbox",
+      "--disable-gpu",
+      "--disable-dev-shm-usage",
+      "--no-zygote",
+      "--single-process"
+    ],
+  });
+
   const page = await browser.newPage();
   console.log("setup done")
 
