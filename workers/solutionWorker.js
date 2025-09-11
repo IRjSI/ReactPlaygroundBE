@@ -16,6 +16,11 @@ const redis = createClient({
     rejectUnauthorized: false,
   },
 });
+redis.on("connect", () => console.log("Connected to Redis!"));
+redis.on("ready", () => console.log("Redis ready!"));
+subscriber.on("connect", () => console.log("Connected to subscriber!"));
+subscriber.on("ready", () => console.log("subscriber ready!"));
+
 
 await subscriber.connect();
 await redis.connect();

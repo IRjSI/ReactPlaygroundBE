@@ -7,6 +7,9 @@ const redis = createClient({
     rejectUnauthorized: false,
   },
 });
+redis.on("connect", () => console.log("Connected to Redis!"));
+redis.on("ready", () => console.log("Redis ready!"));
+
 await redis.connect();
 
 async function enqueueSolution(solutionId, iframeDoc) {
