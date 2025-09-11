@@ -6,6 +6,7 @@
   "scripts": {
     "build": "echo \"No build step defined\"",
     "start": "node app.js",
+    "postinstall": "npx playwright install chromium",
     "dev": "concurrently \"nodemon app.js\" \"nodemon workers/solutionWorker.js\""
   },
   "keywords": [],
