@@ -8,3 +8,6 @@
 5. A worker is **subscribed** to it.
 6. The worker validates the solution.
 7. With websockets backend keeps asking worker if the validation is complete and gets the result(valid/invalid).
+
+# Redis issue in production(queuing)
+Maybe because of the url provided by **Render**. Render provides one instance of key/value for free trial and that is `redis://...` and not `rediss://...` queues are blocked due to this in production mode, works fine in dev mode.

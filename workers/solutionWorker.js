@@ -3,10 +3,18 @@ import puppeteer from "puppeteer";
 import * as Babel from '@babel/standalone';
 
 const subscriber = createClient({
-  url: process.env.REDIS_URL
+  url: process.env.REDIS_URL,
+  socket: {
+    tls: true,
+    rejectUnauthorized: false,
+  },
 });
 const redis = createClient({
-  url: process.env.REDIS_URL
+  url: process.env.REDIS_URL,
+  socket: {
+    tls: true,
+    rejectUnauthorized: false,
+  },
 });
 
 await subscriber.connect();
