@@ -4,7 +4,7 @@
   "main": "index.js",
   "type": "module",
   "scripts": {
-    "build": "echo \"No build step defined\"",
+    "build": "npx playwright install --with-deps chromium",
     "start": "node app.js",
     "postinstall": "npx playwright install chromium",
     "dev": "concurrently \"nodemon app.js\" \"nodemon workers/solutionWorker.js\""
