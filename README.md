@@ -31,3 +31,5 @@ By adding this line in `app.js`
 
 ### Also 
 Do not use `puppeteer-core` as it doesn't come with chrome by default, so use `puppeteer`
+
+INSTEAD, use `playwright` - better alternative

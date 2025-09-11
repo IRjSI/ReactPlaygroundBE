@@ -1,5 +1,5 @@
 import { createClient } from "redis";
-import puppeteer from "puppeteer";
+import { chromium } from "playwright";
 import * as Babel from '@babel/standalone';
 
 const subscriber = createClient({
@@ -61,7 +61,7 @@ await subscriber.subscribe("solution_channel", async (message) => {
   `;
 
   // Launch headless browser
-  const browser = await puppeteer.launch({
+  const browser = await chromium.launch({
     headless: true,
     args: [
       "--no-sandbox",
