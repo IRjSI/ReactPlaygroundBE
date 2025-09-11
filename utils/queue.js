@@ -6,6 +6,7 @@ const redis = createClient({
 await redis.connect();
 
 async function enqueueSolution(solutionId, iframeDoc) {
+  console.log(solutionId, " :: ", iframeDoc)
   await redis.rPush("solutions_queue", JSON.stringify({ solutionId, iframeDoc }));
   await redis.publish("solution_channel", JSON.stringify({ solutionId }));
   console.log("done queuing")

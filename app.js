@@ -49,6 +49,7 @@ const clients = new Map();
 
 io.on("connection", (socket) => {
     socket.on("register", (solutionId) => {
+        console.log("io connection has been made")
         clients.set(solutionId, socket.id);
     });
 
@@ -61,9 +62,11 @@ io.on("connection", (socket) => {
 
 // Subscribe to worker results
 subscribeToResults((solutionId, result) => {
+  console.log("Is this?")
   const socketId = clients.get(solutionId); // since it is a map, so provide key to get value
   if (socketId) {
     io.to(socketId).emit("solutionResult", { solutionId, result });
+    console.log("result sent to FE")
     clients.delete(solutionId);
   }
 });
