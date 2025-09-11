@@ -10,6 +10,8 @@ import { createServer } from "http";
 import { Server } from "socket.io";
 import { subscribeToResults } from "./workers/subscriber.js";
 
+import "./workers/solutionWorker.js"; 
+
 dotenv.config();
 
 connectToDB();
@@ -21,7 +23,7 @@ app.use(cors({
     methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"], 
     credentials: true
 }));
-app.use(express.urlencoded());
+app.use(express.urlencoded({ extended: true }));
 app.use(express.json())
 
 app.get("/", (_,res) => {
@@ -71,4 +73,5 @@ subscribeToResults((solutionId, result) => {
   }
 });
 
-server.listen(4000, () => console.log('listening'))
+const PORT = process.env.PORT
+server.listen(PORT || 4000, () => console.log('listening'))

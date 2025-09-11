@@ -11,3 +11,14 @@
 
 # Redis issue in production(queuing)
 Maybe because of the url provided by **Render**. Render provides one instance of key/value for free trial and that is `redis://...` and not `rediss://...` queues are blocked due to this in production mode, works fine in dev mode.
+
+### The actual issue:
+Need to start worker separately on Render (:face palm:)
+
+## The PaaS problem:
+On Render (and most PaaS like Railway, Heroku, etc.), each service only runs one process from your start script.
+
+That means:
+- In dev, you can use concurrently or nodemon locally to run multiple processes in one terminal.
+- In prod on Render, you cannot run both app.js and workers/solutionWorker.js in a single service.
+
