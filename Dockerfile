@@ -1,27 +1,58 @@
-# Use the latest Playwright image
-FROM mcr.microsoft.com/playwright:v1.47.0-jammy
+# Use Ubuntu base image and install Playwright manually
+FROM ubuntu:22.04
+
+# Install Node.js and basic dependencies
+RUN apt-get update && apt-get install -y \
+    curl \
+    wget \
+    gnupg \
+    && curl -fsSL https://deb.nodesource.com/setup_18.x | bash - \
+    && apt-get install -y nodejs \
+    && apt-get clean \
+    && rm -rf /var/lib/apt/lists/*
+
+# Install Playwright system dependencies
+RUN apt-get update && apt-get install -y \
+    libnss3 \
+    libnspr4 \
+    libatk-bridge2.0-0 \
+    libdrm2 \
+    libxkbcommon0 \
+    libgbm1 \
+    libasound2 \
+    libxrandr2 \
+    libxcomposite1 \
+    libxdamage1 \
+    libxfixes3 \
+    libxss1 \
+    && apt-get clean \
+    && rm -rf /var/lib/apt/lists/*
 
 # Set working directory
 WORKDIR /app
 
-# Copy package files first for better caching
+# Copy package files
 COPY package*.json ./
 
-# Install Node.js dependencies
+# Install Node.js dependencies (this installs Playwright)
 RUN npm ci --only=production
 
-# Install Playwright browsers in a specific location
+# Install Playwright browsers with explicit path
+ENV PLAYWRIGHT_BROWSERS_PATH=/app/browsers
 RUN npx playwright install chromium
+RUN npx playwright install-deps chromium
 
-# Find and list actual browser locations for debugging
-RUN find / -name "chrome" -type f 2>/dev/null | head -10 || echo "Chrome executable not found"
-RUN find / -name "chromium*" -type d 2>/dev/null | head -10 || echo "Chromium directories not found"
+# Verify installation and show paths
+RUN ls -la /app/browsers/ || echo "Browsers not in /app/browsers"
+RUN find /root -name "*chromium*" -type d 2>/dev/null | head -5 || echo "No chromium dirs in /root"
+RUN which chrome || echo "Chrome not in PATH"
 
-# Copy the rest of the application code
+# Copy application code
 COPY . .
 
-# Export the browsers path that Playwright uses by default
-ENV PLAYWRIGHT_BROWSERS_PATH=/ms-playwright
+# Set environment variables
+ENV NODE_ENV=production
+ENV PLAYWRIGHT_BROWSERS_PATH=/app/browsers
 
 # Expose port
 EXPOSE 4000
