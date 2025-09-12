@@ -10,19 +10,18 @@ COPY package*.json ./
 # Install Node.js dependencies
 RUN npm ci --only=production
 
-# Explicitly install and verify Playwright browsers
+# Install Playwright browsers in a specific location
 RUN npx playwright install chromium
-RUN npx playwright install-deps chromium
 
-# Verify browser installation
-RUN ls -la /ms-playwright/chromium-*/ || echo "Browsers not found in expected location"
+# Find and list actual browser locations for debugging
+RUN find / -name "chrome" -type f 2>/dev/null | head -10 || echo "Chrome executable not found"
+RUN find / -name "chromium*" -type d 2>/dev/null | head -10 || echo "Chromium directories not found"
 
 # Copy the rest of the application code
 COPY . .
 
-# Set environment variables to help Playwright find browsers
+# Export the browsers path that Playwright uses by default
 ENV PLAYWRIGHT_BROWSERS_PATH=/ms-playwright
-ENV PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD=false
 
 # Expose port
 EXPOSE 4000
