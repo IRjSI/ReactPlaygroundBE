@@ -95,24 +95,6 @@ await subscriber.subscribe("solution_channel", async (message) => {
   console.log('Checking browser paths...');
   console.log('PLAYWRIGHT_BROWSERS_PATH:', process.env.PLAYWRIGHT_BROWSERS_PATH);
 
-  const commonPaths = [
-    '/ms-playwright',
-    '/opt/render/.cache/ms-playwright',
-    '/root/.cache/ms-playwright'
-  ];
-
-  for (const browserPath of commonPaths) {
-    try {
-      if (fs.existsSync(browserPath)) {
-        console.log(`Found browser directory: ${browserPath}`);
-        const contents = fs.readdirSync(browserPath);
-        console.log('Contents:', contents);
-      }
-    } catch (err) {
-      console.log(`Cannot access ${browserPath}`);
-    }
-  }
-
   const browser = await launchBrowser()
 
   const page = await browser.newPage();
