@@ -1,19 +1,30 @@
-# Use the official Playwright image (this should have browsers pre-installed)
-FROM mcr.microsoft.com/playwright:v1.40.0-jammy
+# Use Node.js slim image
+FROM node:18-slim
+
+# Install Chrome dependencies
+RUN apt-get update \
+    && apt-get install -y wget gnupg \
+    && wget -q -O - https://dl-ssl.google.com/linux/linux_signing_key.pub | gpg --dearmor -o /usr/share/keyrings/googlechrome-linux-keyring.gpg \
+    && sh -c 'echo "deb [arch=amd64 signed-by=/usr/share/keyrings/googlechrome-linux-keyring.gpg] http://dl.google.com/linux/chrome/deb/ stable main" >> /etc/apt/sources.list.d/google.list' \
+    && apt-get update \
+    && apt-get install -y google-chrome-stable fonts-ipafont-gothic fonts-wqy-zenhei fonts-thai-tlwg fonts-kacst fonts-freefont-ttf libxss1 \
+    --no-install-recommends \
+    && rm -rf /var/lib/apt/lists/*
 
 WORKDIR /app
 
 # Copy package files
 COPY package*.json ./
 
-# Install dependencies
+# Install Node.js dependencies
 RUN npm ci --only=production
 
-# Copy app code  
+# Copy application code
 COPY . .
 
-# Don't set custom browser paths - let Playwright use its defaults
-# The official image should have browsers in the right locations
+# Set Puppeteer to use the installed Chrome
+ENV PUPPETEER_SKIP_CHROMIUM_DOWNLOAD=true
+ENV PUPPETEER_EXECUTABLE_PATH=/usr/bin/google-chrome-stable
 
 EXPOSE 4000
 CMD ["node", "app.js"]

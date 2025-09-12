@@ -1,58 +1,35 @@
 import { createClient } from "redis";
-import { chromium } from "playwright";
+import puppeteer from "puppeteer";
 import * as Babel from '@babel/standalone';
 
 import fs from 'fs';
 
 async function launchBrowser() {
-  // Try multiple strategies
-  const strategies = [
-    // Strategy 1: Let Playwright auto-detect
-    { executablePath: undefined, name: 'auto-detect' },
+  try {
+    console.log('Launching Puppeteer browser...');
     
-    // Strategy 2: Common Docker paths
-    { executablePath: '/usr/bin/chromium', name: 'system chromium' },
-    { executablePath: '/usr/bin/chromium-browser', name: 'system chromium-browser' },
-    { executablePath: '/usr/bin/google-chrome', name: 'system chrome' },
-    { executablePath: '/usr/bin/google-chrome-stable', name: 'system chrome stable' },
+    const browser = await puppeteer.launch({
+      headless: true,
+      executablePath: process.env.PUPPETEER_EXECUTABLE_PATH || '/usr/bin/google-chrome-stable',
+      args: [
+        '--no-sandbox',
+        '--disable-setuid-sandbox',
+        '--disable-dev-shm-usage',
+        '--disable-gpu',
+        '--no-first-run',
+        '--no-zygote',
+        '--single-process',
+        '--disable-extensions'
+      ],
+    });
+
+    console.log('✅ Puppeteer browser launched successfully');
+    return browser;
     
-    // Strategy 3: Playwright installed paths
-    { executablePath: '/root/.cache/ms-playwright/chromium-1187/chrome-linux/chrome', name: 'playwright root cache' },
-    { executablePath: '/app/browsers/chromium-1187/chrome-linux/chrome', name: 'app browsers' },
-  ];
-
-  for (const strategy of strategies) {
-    try {
-      console.log(`Trying strategy: ${strategy.name}`);
-      
-      // Check if executable exists (if path specified)
-      if (strategy.executablePath && !fs.existsSync(strategy.executablePath)) {
-        console.log(`Executable not found: ${strategy.executablePath}`);
-        continue;
-      }
-
-      const browser = await chromium.launch({
-        headless: true,
-        executablePath: strategy.executablePath,
-        args: [
-          "--no-sandbox",
-          "--disable-setuid-sandbox",
-          "--disable-gpu",
-          "--disable-dev-shm-usage",
-          "--no-zygote",
-          "--single-process"
-        ],
-      });
-
-      console.log(`✅ Successfully launched browser with: ${strategy.name}`);
-      return browser;
-      
-    } catch (err) {
-      console.log(`❌ Failed with ${strategy.name}: ${err.message}`);
-    }
+  } catch (err) {
+    console.error('❌ Failed to launch Puppeteer:', err.message);
+    throw err;
   }
-  
-  throw new Error('Could not launch browser with any strategy');
 }
 
 const subscriber = createClient({
