@@ -2,8 +2,6 @@ import { createClient } from "redis";
 import puppeteer from "puppeteer";
 import * as Babel from '@babel/standalone';
 
-import fs from 'fs';
-
 async function launchBrowser() {
   try {
     console.log('Launching Puppeteer browser...');
