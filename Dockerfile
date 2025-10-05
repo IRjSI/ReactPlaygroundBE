@@ -26,5 +26,9 @@ COPY . .
 ENV PUPPETEER_SKIP_CHROMIUM_DOWNLOAD=true
 ENV PUPPETEER_EXECUTABLE_PATH=/usr/bin/google-chrome-stable
 
+# Render uses PORT environment variable
+ENV PORT=4000
 EXPOSE 4000
-CMD ["node", "app.js"]
+
+# Start both app and worker (if using concurrently)
+CMD ["npm", "start"]
