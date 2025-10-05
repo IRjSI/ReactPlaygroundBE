@@ -1,3 +1,6 @@
+import dotenv from "dotenv";
+dotenv.config();
+
 import { createClient } from "redis";
 import puppeteer from "puppeteer";
 import * as Babel from '@babel/standalone';
@@ -6,9 +9,8 @@ async function launchBrowser() {
   try {
     console.log('Launching Puppeteer browser...');
     
-    const browser = await puppeteer.launch({
+    const launchOptions = {
       headless: true,
-      executablePath: process.env.PUPPETEER_EXECUTABLE_PATH || '/usr/bin/google-chrome-stable',
       args: [
         '--no-sandbox',
         '--disable-setuid-sandbox',
@@ -19,7 +21,15 @@ async function launchBrowser() {
         '--single-process',
         '--disable-extensions'
       ],
-    });
+    };
+
+    // Only use custom executablePath if explicitly set in .env
+    // Otherwise, let Puppeteer use its bundled Chromium
+    if (process.env.PUPPETEER_EXECUTABLE_PATH) {
+      launchOptions.executablePath = process.env.PUPPETEER_EXECUTABLE_PATH;
+    }
+    
+    const browser = await puppeteer.launch(launchOptions);
 
     console.log('✅ Puppeteer browser launched successfully');
     return browser;
@@ -29,7 +39,6 @@ async function launchBrowser() {
     throw err;
   }
 }
-
 const subscriber = createClient({
   url: process.env.REDIS_URL,
   socket: {
@@ -55,15 +64,15 @@ await redis.connect();
 
 await subscriber.subscribe("solution_channel", async (message) => {
   const { solutionId } = JSON.parse(message);
-  console.log("reached solution worker with:: ", solutionId)
+  console.log("Processing solution:", solutionId);
   
-  // Pop user submission from queue
-  const solutionData = await redis.lPop("solutions_queue");
+  // Get the specific solution data
+  const solutionData = await redis.get(`solution:${solutionId}`);
   if (!solutionData) return;
-  console.log("popped the data from queue") // mostly this is the issue
   
-  const { iframeDoc } = JSON.parse(solutionData); // code is JSX/React source
-  console.log("loaded the iframe::", iframeDoc)
+  await redis.del(`solution:${solutionId}`); // Clean up
+  
+  const { iframeDoc } = JSON.parse(solutionData);
 
   // Compile JSX → plain JS
   const compiledCode = Babel.transform(iframeDoc, { presets: ['react'] }).code;

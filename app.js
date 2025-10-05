@@ -1,6 +1,7 @@
+import dotenv from "dotenv";
+dotenv.config();
 import express from "express";
 import cors from "cors";
-import dotenv from "dotenv";
 import userRouter from "./routes/user.route.js";
 import { connectToDB } from "./db/config.js";
 import challengeRouter from "./routes/challenge.route.js";
@@ -10,24 +11,23 @@ import { createServer } from "http";
 import { Server } from "socket.io";
 import { subscribeToResults } from "./workers/subscriber.js";
 
-import "./workers/solutionWorker.js"; 
+// import "./workers/solutionWorker.js"; 
 
-dotenv.config();
 
 connectToDB();
 
 const app = express();
 
 app.use(cors({
-    origin: ["http://localhost:5173", "https://reactpg.vercel.app", "https://react-playground-git-solution-rjss-projects.vercel.app"],
-    methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"], 
-    credentials: true
+  origin: ["http://localhost:5173", "https://reactpg.vercel.app", "https://react-playground-git-solution-rjss-projects.vercel.app"],
+  methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"], 
+  credentials: true
 }));
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json())
 
 app.get("/", (_,res) => {
-    res.send("restening")
+  res.send("restening")
 })
 
 app.use('/api/v1/user', userRouter);
@@ -50,22 +50,21 @@ const io = new Server(server, {
 const clients = new Map();
 
 io.on("connection", (socket) => {
-    socket.on("register", (solutionId) => {
-        console.log("io connection has been made")
-        clients.set(solutionId, socket.id);
-    });
+  socket.on("register", (solutionId) => {
+    console.log("io connection has been made")
+    clients.set(solutionId, socket.id);
+  });
 
-    socket.on("disconnect", () => {
-        for (const [solutionId, sId] of clients) {
-          if (sId === socket.id) clients.delete(solutionId);
-        }
-    });
+  socket.on("disconnect", () => {
+    for (const [solutionId, sId] of clients) {
+      if (sId === socket.id) clients.delete(solutionId);
+    }
+  });
 });
 
 // Subscribe to worker results
-subscribeToResults((solutionId, result) => {
-  console.log("Is this?")
-  const socketId = clients.get(solutionId); // since it is a map, so provide key to get value
+await subscribeToResults((solutionId, result) => {
+  const socketId = clients.get(solutionId);
   if (socketId) {
     io.to(socketId).emit("solutionResult", { solutionId, result });
     console.log("result sent to FE")
@@ -74,4 +73,5 @@ subscribeToResults((solutionId, result) => {
 });
 
 const PORT = process.env.PORT
-server.listen(PORT || 4000, () => console.log('listening'))
+console.log(PORT)
+server.listen(PORT || 5000, () => console.log('listening'))

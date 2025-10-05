@@ -22,7 +22,7 @@
     "jsonwebtoken": "^9.0.2",
     "mongoose": "^8.14.0",
     "nodemon": "^3.1.10",
-    "puppeteer": "^24.20.0",
+    "puppeteer": "^24.23.0",
     "redis": "^5.8.2",
     "socket.io": "^4.8.1",
     "socketio": "^1.0.0"

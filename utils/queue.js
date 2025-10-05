@@ -1,3 +1,6 @@
+import dotenv from "dotenv";
+dotenv.config();
+
 import { createClient } from "redis";
 
 const redis = createClient({
@@ -13,10 +16,10 @@ redis.on("ready", () => console.log("Redis ready!"));
 await redis.connect();
 
 async function enqueueSolution(solutionId, iframeDoc) {
-  console.log(solutionId, " :: ", iframeDoc)
-  await redis.rPush("solutions_queue", JSON.stringify({ solutionId, iframeDoc }));
+  // Store the data with the solutionId as key
+  await redis.set(`solution:${solutionId}`, JSON.stringify({ solutionId, iframeDoc }));
+  // Notify that this specific solution is ready
   await redis.publish("solution_channel", JSON.stringify({ solutionId }));
-  console.log("done queuing")
   return solutionId;
 }
 
