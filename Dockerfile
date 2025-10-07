@@ -16,15 +16,16 @@ WORKDIR /app
 # Copy package files
 COPY package*.json ./
 
+# Set Puppeteer to use the installed Chrome
+# set it before npm ci
+ENV PUPPETEER_SKIP_CHROMIUM_DOWNLOAD=true
+ENV PUPPETEER_EXECUTABLE_PATH=/usr/bin/google-chrome-stable
+
 # Install Node.js dependencies
 RUN npm ci --only=production
 
 # Copy application code
 COPY . .
-
-# Set Puppeteer to use the installed Chrome
-ENV PUPPETEER_SKIP_CHROMIUM_DOWNLOAD=true
-ENV PUPPETEER_EXECUTABLE_PATH=/usr/bin/google-chrome-stable
 
 # Render uses PORT environment variable
 ENV PORT=4000

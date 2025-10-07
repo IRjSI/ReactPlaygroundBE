@@ -31,3 +31,65 @@ By adding this line in `app.js`
 
 ### Also 
 Do not use `puppeteer-core` as it doesn't come with chrome by default, so use `puppeteer`
+
+The solution that worked:
+```jsx
+const launchOptions = {
+    headless: true,
+    args: [
+    '--no-sandbox',
+    '--disable-setuid-sandbox',
+    '--disable-dev-shm-usage',
+    '--disable-gpu',
+    '--no-first-run',
+    '--no-zygote',
+    '--single-process',
+    '--disable-extensions'
+    ],
+};
+
+// Only use custom executablePath if explicitly set in .env
+// Otherwise, let Puppeteer use its bundled Chromium
+if (process.env.PUPPETEER_EXECUTABLE_PATH) {
+    launchOptions.executablePath = process.env.PUPPETEER_EXECUTABLE_PATH;
+}
+
+const browser = await puppeteer.launch(launchOptions);
+
+console.log('✅ Puppeteer browser launched successfully');
+return browser;
+```
+
+## The Docker File
+Puppeteer Configuration
+```dockerfile
+ENV PUPPETEER_SKIP_CHROMIUM_DOWNLOAD=true
+```
+Environment variable that tells Puppeteer not to download its own Chromium
+Why?: We already installed Chrome manually, so downloading another browser wastes time and space
+
+```dockerfile
+ENV PUPPETEER_EXECUTABLE_PATH=/usr/bin/google-chrome-stable
+```
+Tells Puppeteer where to find Chrome
+Without this, Puppeteer would look for its bundled Chromium and fail
+
+#### Skip-chromium-download
+When we run npm install puppeteer, Puppeteer has a post-install script that automatically downloads Chromium. This environment variable tells that script to skip the download.
+
+##### Step-by-step:
+What happens during npm ci:
+
+- npm reads package.json and sees puppeteer as a dependency
+- npm downloads puppeteer from npm registry
+- Puppeteer's post-install script runs (node install.js)
+- The install script checks for PUPPETEER_SKIP_CHROMIUM_DOWNLOAD environment variable
+- If set to true: Skips Chromium download
+
+#### Local V/S Production
+```jsx
+if (process.env.PUPPETEER_EXECUTABLE_PATH) {
+    launchOptions.executablePath = process.env.PUPPETEER_EXECUTABLE_PATH;
+}
+```
+The condition is `false` in local dev if env variables are not provided, but in production we are providing env variables with docker file, so `true`

@@ -11,7 +11,7 @@ import { createServer } from "http";
 import { Server } from "socket.io";
 import { subscribeToResults } from "./workers/subscriber.js";
 
-// import "./workers/solutionWorker.js"; 
+import "./workers/solutionWorker.js";
 
 
 connectToDB();
