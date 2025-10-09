@@ -13,6 +13,8 @@ RUN apt-get update \
 
 WORKDIR /app
 
+ENV CACHE_BUST=2025-10-10-v1
+
 # Copy package files
 COPY package*.json ./
 
@@ -20,8 +22,6 @@ COPY package*.json ./
 # set it before npm ci
 ENV PUPPETEER_SKIP_CHROMIUM_DOWNLOAD=true
 ENV PUPPETEER_EXECUTABLE_PATH=/usr/bin/google-chrome-stable
-
-RUN npm install dotenv --save
 
 # Install Node.js dependencies
 RUN npm ci --only=production
