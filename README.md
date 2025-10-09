@@ -6,8 +6,17 @@
 3. Backend adds it to the *queue*.
 4. Backend also **publishes** it via *Redis pub/sub*.
 5. A worker is **subscribed** to it.
-6. The worker validates the solution.
-7. With websockets backend keeps asking worker if the validation is complete and gets the result(valid/invalid).
+6. Worker → finishes validation and publishes { solutionId, result } to results_channel.
+7. Backend → is subscribed to results_channel.
+- When it receives the message, it finds the correct socket (solutionId → socketId mapping).
+- It emits the result to the frontend via WebSocket.
+
+``` 
+Frontend  →  Backend  →  Redis Pub  →  Worker
+Worker    →  Redis Pub  →  Backend Sub  →  Frontend (via socket.io)
+```
+
+That is, No polling, no repeated checking, just pure Pub/Sub.
 
 # Redis issue in production(queuing)
 Maybe because of the url provided by **Render**. Render provides one instance of key/value for free trial and that is `redis://...` and not `rediss://...` queues are blocked due to this in production mode, works fine in dev mode.
@@ -29,8 +38,28 @@ import "./workers/solutionWorker.js";
 ```
 By adding this line in `app.js`
 
+
+## Puppeteer
+Puppeteer is used because the script needs to:
+- Run React code in a browser-like environment
+    - React is a client-side library; JSX won’t “just run” in Node.js.
+    - Puppeteer launches a headless Chromium instance, which acts like a real browser.
+- Simulate real user interactions
+    - The code checks if a button click updates the text as expected. This requires a real DOM and a browser event loop—something Node alone can’t emulate accurately.
+    - Puppeteer allows you to:
+    ```js
+    const button = await page.waitForSelector("button");
+    await button.click();
+    ```
+    exactly like a real user clicking the button.
+
 ### Also 
 Do not use `puppeteer-core` as it doesn't come with chrome by default, so use `puppeteer`
+
+## The Solution Worker Flow
+JSX string → Babel → plain JS
+Plain JS → Puppeteer → runs in browser DOM
+Browser → simulate user actions + verify behavior
 
 The solution that worked:
 ```jsx
@@ -59,6 +88,9 @@ const browser = await puppeteer.launch(launchOptions);
 console.log('✅ Puppeteer browser launched successfully');
 return browser;
 ```
+
+## Dockerfile with Render
+When we deploy a service from a Git repo, Render looks for a file named Dockerfile in the root directory (or in a specified path if we configure it manually).
 
 ## The Docker File
 Puppeteer Configuration

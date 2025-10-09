@@ -1,7 +1,7 @@
 # Use Node.js slim image
 FROM node:18-slim
 
-# Install Chrome dependencies
+# Install Chrome dependencies for Puppeteer
 RUN apt-get update \
     && apt-get install -y wget gnupg \
     && wget -q -O - https://dl-ssl.google.com/linux/linux_signing_key.pub | gpg --dearmor -o /usr/share/keyrings/googlechrome-linux-keyring.gpg \
@@ -31,5 +31,5 @@ COPY . .
 ENV PORT=4000
 EXPOSE 4000
 
-# Start both app and worker (if using concurrently)
+# Start both app and worker
 CMD ["npm", "start"]
