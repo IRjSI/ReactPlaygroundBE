@@ -21,6 +21,8 @@ COPY package*.json ./
 ENV PUPPETEER_SKIP_CHROMIUM_DOWNLOAD=true
 ENV PUPPETEER_EXECUTABLE_PATH=/usr/bin/google-chrome-stable
 
+RUN npm install dotenv --save
+
 # Install Node.js dependencies
 RUN npm ci --only=production
 
