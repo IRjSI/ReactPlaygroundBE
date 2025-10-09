@@ -6,6 +6,25 @@ import puppeteer from "puppeteer";
 import * as Babel from '@babel/standalone';
 import fs from "fs";
 import path from "path";
+import { fileURLToPath } from "url";
+
+// Convert ES module URL to file path
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
+// Now you can use __dirname
+const validatorsDir = path.join(__dirname, "../validators");
+const validators = {};
+if (fs.existsSync(validatorsDir)) {
+  const validatorFiles = fs.readdirSync(validatorsDir);
+  for (const file of validatorFiles) {
+    const challengeKey = path.basename(file, ".js"); // e.g., "challenge2Validator"
+    validators[challengeKey] = (await import(`file://${path.join(validatorsDir, file)}`)).default;
+  }
+  console.log("Loaded validators:", Object.keys(validators));
+} else {
+  console.warn("Validators folder not found:", validatorsDir);
+}
 
 async function launchBrowser() {
   try {
@@ -64,16 +83,15 @@ redis.on("ready", () => console.log("Redis ready!"));
 subscriber.on("connect", () => console.log("Connected to subscriber!"));
 subscriber.on("ready", () => console.log("subscriber ready!"));
 
+redis.on("error", (err) => {
+  console.error("Redis Client Error:", err);
+});
+subscriber.on("error", (err) => {
+  console.error("Redis Subscriber Error:", err);
+});
+
 await subscriber.connect();
 await redis.connect();
-
-// --- Load all validators dynamically ---
-const validators = {};
-const validatorFiles = fs.readdirSync(path.join(__dirname, "../challenges/validators"));
-for (const file of validatorFiles) {
-  const challengeId = path.basename(file, ".js"); // e.g., "challenge2Validator"
-  validators[challengeId] = (await import(`../challenges/validators/${file}`)).default;
-}
 
 // subscribed to "solution_channel" to get the solution updates
 await subscriber.subscribe("solution_channel", async (message) => {
@@ -126,6 +144,7 @@ await subscriber.subscribe("solution_channel", async (message) => {
   await page.setContent(html, { waitUntil: 'domcontentloaded' });
 
   let isValid = false;
+  const challengeId = "challenge2Validator";
 
   console.log("reached validity check")
 

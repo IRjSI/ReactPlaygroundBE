@@ -10,11 +10,11 @@ export default async function validateChallenge2(page) {
     await button.click();
 
     // wait a small delay to allow React to update state
-    await page.waitForTimeout(100);
+    // await page.waitForTimeout(100);
 
     // get updated text
     const afterText = await page.evaluate(el => el.textContent?.toLowerCase().trim(), button);
-    
+
     return beforeText !== afterText && afterText === "click";
   } catch (err) {
     console.error("Validation error:", err.message);
