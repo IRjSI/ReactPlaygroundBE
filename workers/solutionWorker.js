@@ -4,6 +4,8 @@ dotenv.config();
 import { createClient } from "redis";
 import puppeteer from "puppeteer";
 import * as Babel from '@babel/standalone';
+import fs from "fs";
+import path from "path";
 
 async function launchBrowser() {
   try {
@@ -65,6 +67,13 @@ subscriber.on("ready", () => console.log("subscriber ready!"));
 await subscriber.connect();
 await redis.connect();
 
+// --- Load all validators dynamically ---
+const validators = {};
+const validatorFiles = fs.readdirSync(path.join(__dirname, "../challenges/validators"));
+for (const file of validatorFiles) {
+  const challengeId = path.basename(file, ".js"); // e.g., "challenge2Validator"
+  validators[challengeId] = (await import(`../challenges/validators/${file}`)).default;
+}
 
 // subscribed to "solution_channel" to get the solution updates
 await subscriber.subscribe("solution_channel", async (message) => {
@@ -121,26 +130,37 @@ await subscriber.subscribe("solution_channel", async (message) => {
   console.log("reached validity check")
 
   // validator for the challenge 2... need for other challenges
+  // try {
+  //   // wait for the button to appear
+  //   const button = await page.waitForSelector("button", { timeout: 2000 });
+
+  //   // get initial text
+  //   const beforeText = await page.evaluate(el => el.textContent?.toLowerCase().trim(), button);
+
+  //   // click button
+  //   await button.click();
+
+  //   // wait a small delay to allow React to update state
+  //   await page.waitForTimeout(100);
+
+  //   // get updated text
+  //   const afterText = await page.evaluate(el => el.textContent?.toLowerCase().trim(), button);
+
+  //   isValid = beforeText !== afterText && afterText === "click";
+
+  // } catch (err) {
+  //   console.error("Validation error:", err.message);
+  // }
+
+  // for other challenges
   try {
-    // wait for the button to appear
-    const button = await page.waitForSelector("button", { timeout: 2000 });
-
-    // get initial text
-    const beforeText = await page.evaluate(el => el.textContent?.toLowerCase().trim(), button);
-
-    // click button
-    await button.click();
-
-    // wait a small delay to allow React to update state
-    await page.waitForTimeout(100);
-
-    // get updated text
-    const afterText = await page.evaluate(el => el.textContent?.toLowerCase().trim(), button);
-
-    isValid = beforeText !== afterText && afterText === "click";
-
+    if (validators[challengeId]) {
+      isValid = await validators[challengeId](page);
+    } else {
+      console.warn(`No validator found for ${challengeId}, marking invalid`);
+    }
   } catch (err) {
-    console.error("Validation error:", err.message);
+    console.error("Validator error:", err.message);
   }
 
   console.log("browser closing")
