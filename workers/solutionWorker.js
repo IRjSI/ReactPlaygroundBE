@@ -144,6 +144,8 @@ await subscriber.subscribe("solution_channel", async (message) => {
   await page.setContent(html, { waitUntil: 'domcontentloaded' });
 
   let isValid = false;
+
+  // HARDCODED FOR TESTING
   const challengeId = "challenge2Validator";
 
   console.log("reached validity check")
