@@ -11,11 +11,18 @@ import { createServer } from "http";
 import { Server } from "socket.io";
 import { subscribeToResults } from "./workers/subscriber.js";
 
-if (process.env.RUN_WORKER === "true") {
-  import("./workers/solutionWorker.js")
-    .then(() => console.log("Worker started"))
-    .catch((err) => console.error("Worker failed:", err));
-}
+import { fork } from "child_process";
+import path from "path";
+import { fileURLToPath } from "url";
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
+const workerPath = path.join(__dirname, "workers", "solutionWorker.js");
+const worker = fork(workerPath);
+
+worker.on("error", (err) => console.error("Worker error:", err));
+worker.on("exit", (code) => console.log("Worker exited with code", code));
 
 
 connectToDB();
