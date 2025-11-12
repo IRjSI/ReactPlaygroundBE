@@ -24,7 +24,7 @@ ENV PUPPETEER_SKIP_CHROMIUM_DOWNLOAD=true
 ENV PUPPETEER_EXECUTABLE_PATH=/usr/bin/google-chrome-stable
 
 # Install Node.js dependencies
-RUN npm install --production
+RUN npm ci --omit=dev
 
 # Copy application code
 COPY . .
