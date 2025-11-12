@@ -13,7 +13,7 @@ RUN apt-get update \
 
 WORKDIR /app
 
-ENV CACHE_BUST=2025-10-10-v1
+ENV CACHE_BUST=2025-11-12-v1
 
 # Copy package files
 COPY package*.json ./
@@ -24,7 +24,7 @@ ENV PUPPETEER_SKIP_CHROMIUM_DOWNLOAD=true
 ENV PUPPETEER_EXECUTABLE_PATH=/usr/bin/google-chrome-stable
 
 # Install Node.js dependencies
-RUN npm ci --only=production
+RUN npm install --production
 
 # Copy application code
 COPY . .
