@@ -4,7 +4,7 @@
   "main": "index.js",
   "type": "module",
   "scripts": {
-    "start": "node app.js",
+    "start:web": "node app.js",
     "dev": "concurrently \"nodemon app.js\" \"nodemon workers/solutionWorker.js\""
   },
   "keywords": [],

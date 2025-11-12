@@ -31,6 +31,7 @@ COPY . .
 
 # Render uses PORT environment variable
 ENV PORT=4000
+ENV NODE_ENV=production
 EXPOSE 4000
 
 # Start both app and worker

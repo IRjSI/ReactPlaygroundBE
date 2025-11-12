@@ -11,7 +11,11 @@ import { createServer } from "http";
 import { Server } from "socket.io";
 import { subscribeToResults } from "./workers/subscriber.js";
 
-import "./workers/solutionWorker.js";
+if (process.env.RUN_WORKER === "true") {
+  import("./workers/solutionWorker.js")
+    .then(() => console.log("Worker started"))
+    .catch((err) => console.error("Worker failed:", err));
+}
 
 
 connectToDB();
