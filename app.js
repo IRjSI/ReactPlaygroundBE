@@ -74,15 +74,31 @@ io.on("connection", (socket) => {
 });
 
 // Subscribe to worker results
-await subscribeToResults((solutionId, result) => {
-  const socketId = clients.get(solutionId);
-  if (socketId) {
-    io.to(socketId).emit("solutionResult", { solutionId, result });
-    console.log("result sent to FE")
-    clients.delete(solutionId);
-  }
-});
+// await subscribeToResults((solutionId, result) => {
+//   const socketId = clients.get(solutionId);
+//   if (socketId) {
+//     io.to(socketId).emit("solutionResult", { solutionId, result });
+//     console.log("result sent to FE")
+//     clients.delete(solutionId);
+//   }
+// });
 
 const PORT = process.env.PORT
-console.log(PORT)
-server.listen(PORT || 5000, () => console.log('listening'))
+
+server.listen(PORT || 5000, async () => {
+  console.log('Server listening on port', PORT || 5000);
+  
+  try {
+    await subscribeToResults((solutionId, result) => {
+      const socketId = clients.get(solutionId);
+      if (socketId) {
+        io.to(socketId).emit("solutionResult", { solutionId, result });
+        console.log("result sent to FE");
+        clients.delete(solutionId);
+      }
+    });
+    console.log("✅ Redis subscriber connected");
+  } catch (error) {
+    console.error("❌ Redis subscriber error:", error);
+  }
+});
