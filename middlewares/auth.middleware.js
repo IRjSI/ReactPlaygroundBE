@@ -13,7 +13,8 @@ export const verifyToken = async (req,res,next) => {
         
         const decodedToken = jwt.verify(token, process.env.JWT_SECRET);
 
-        const user = await UserModel.findById(decodedToken?._id);
+        const user = await UserModel.findById(decodedToken?.id);
+
         if (!user) {
             return res.status(401).json({
                 message: 'Unautho'

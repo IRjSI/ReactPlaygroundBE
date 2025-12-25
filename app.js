@@ -2,6 +2,7 @@ import dotenv from "dotenv";
 dotenv.config();
 import express from "express";
 import cors from "cors";
+import jwt from "jsonwebtoken";
 import userRouter from "./routes/user.route.js";
 import { connectToDB } from "./db/config.js";
 import challengeRouter from "./routes/challenge.route.js";
@@ -10,6 +11,9 @@ import submissionRouter from "./routes/submission.route.js";
 import { createServer } from "http";
 import { Server } from "socket.io";
 import { subscribeToResults } from "./workers/subscriber.js";
+
+import passport from "passport";
+import "./utils/passport.js";
 
 import { fork } from "child_process";
 import path from "path";
@@ -23,7 +27,6 @@ const worker = fork(workerPath);
 
 worker.on("error", (err) => console.error("Worker error:", err));
 worker.on("exit", (code) => console.log("Worker exited with code", code));
-
 
 connectToDB();
 
@@ -40,6 +43,31 @@ app.use(express.json())
 app.get("/", (_,res) => {
   res.send("restening")
 })
+
+app.get(
+  "/api/auth/google",
+  passport.authenticate("google", { scope: ["profile", "email"] })
+);
+
+app.get(
+  "/api/auth/google/callback",
+  passport.authenticate("google", { session: false }),
+  (req, res) => {
+    const user = req.user;
+
+    const token = jwt.sign(
+      {
+        id: user._id,
+        email: user.email
+      },
+      process.env.JWT_SECRET,
+      { expiresIn: "7d" }
+    );
+
+    // redirect to frontend with token or send JSON
+    res.redirect(`http://localhost:5173/auth/success?token=${token}`);
+  }
+);
 
 app.use('/api/v1/user', userRouter);
 app.use('/api/v1/challenges', challengeRouter);
