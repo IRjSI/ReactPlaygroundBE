@@ -35,4 +35,4 @@ ENV NODE_ENV=production
 EXPOSE 4000
 
 # Start both app and worker
-CMD ["npm", "start:web"]
+CMD ["npm", "run", "start:web"]
