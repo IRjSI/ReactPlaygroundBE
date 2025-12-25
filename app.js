@@ -45,12 +45,12 @@ app.get("/", (_,res) => {
 })
 
 app.get(
-  "/api/auth/google",
+  "/api/v1/auth/google",
   passport.authenticate("google", { scope: ["profile", "email"] })
 );
 
 app.get(
-  "/api/auth/google/callback",
+  "/api/v1/auth/google/callback",
   passport.authenticate("google", { session: false }),
   (req, res) => {
     const user = req.user;
@@ -65,7 +65,7 @@ app.get(
     );
 
     // redirect to frontend with token or send JSON
-    res.redirect(`http://localhost:5173/auth/success?token=${token}`);
+    res.redirect(`https://react-playground-git-solution-rjss-projects.vercel.app/auth/success?token=${token}`);
   }
 );
 
