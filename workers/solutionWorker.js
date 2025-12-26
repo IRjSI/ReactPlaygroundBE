@@ -101,12 +101,17 @@ await subscriber.subscribe("solution_channel", async (message) => {
   
   // get the specific solution data from redis that we 'set' while queueing
   const solutionData = await redis.get(`solution:${solutionId}`);
-  if (!solutionData) return;
+  if (!solutionData) {
+    console.warn("No solution found in redis for", solutionId);
+    return;
+  }
+
+  console.log("solutionData", JSON.parse(solutionData));
   
   // clean up
   await redis.del(`solution:${solutionId}`);
   
-  const { iframeDoc } = JSON.parse(solutionData);
+  const { iframeDoc, challengeId } = JSON.parse(solutionData);
 
   // compile JSX → plain JS
   const compiledCode = Babel.transform(iframeDoc, { presets: ['react'] }).code;
@@ -146,9 +151,11 @@ await subscriber.subscribe("solution_channel", async (message) => {
   let isValid = false;
 
   // HARDCODED FOR TESTING
-  const challengeId = "challenge2Validator";
+  // const challengeId = "challenge2Validator";
 
   console.log("reached validity check")
+
+  console.log(challengeId)
 
   // validator for the challenge 2... need for other challenges
   // try {
@@ -175,8 +182,10 @@ await subscriber.subscribe("solution_channel", async (message) => {
 
   // for other challenges
   try {
+    console.log("validators::", validators);
+    console.log("validators challengeId::", validators[challengeId]);
     if (validators[challengeId]) {
-      isValid = await validators[challengeId](page);
+      isValid = await validators[challengeId](page); //eg. validateChallenge2(page)
     } else {
       console.warn(`No validator found for ${challengeId}, marking invalid`);
     }

@@ -65,7 +65,8 @@ app.get(
     );
 
     // redirect to frontend with token or send JSON
-    res.redirect(`https://react-playground-git-solution-rjss-projects.vercel.app/auth/success?token=${token}`);
+    // res.redirect(`https://react-playground-git-solution-rjss-projects.vercel.app/auth/success?token=${token}`);
+    res.redirect(process.env.NODE_ENV === "dev" ? `http://localhost:5173/auth/success?token=${token}` : `https://reactpg.vercel.app/auth/success?token=${token}`);
   }
 );
 

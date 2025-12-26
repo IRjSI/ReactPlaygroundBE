@@ -1,10 +1,11 @@
 import { enqueueSolution } from "../utils/queue.js";
 
 const checkSolution = async (req, res) => {
-  const { iframeDoc } = req.body;
-  const solutionId = `solution:${Date.now()}`;
+  const { iframeDoc, challengeId } = req.body;
+  console.log("chaking", challengeId)
+  const solutionId = Date.now().toString();
 
-  await enqueueSolution(solutionId, iframeDoc);
+  await enqueueSolution(solutionId, iframeDoc, challengeId);
   return res.json({ solutionId });
 };
 
