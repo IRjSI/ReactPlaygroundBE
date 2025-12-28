@@ -9,7 +9,7 @@ export default async function validateChallenge3(page) {
     await input.type(testValue);
 
     // now wait for something in the page to reflect this text
-    // NOTE: we exclude the input itself — we want displayed text
+    // NOTE: we exclude the input itself, we want displayed text
     const success = await page.waitForFunction(
       (value) => {
         const bodyText = document.body.innerText.toLowerCase();

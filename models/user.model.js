@@ -37,6 +37,18 @@ const UserSchema = new mongoose.Schema({
             ref: 'solution'
         }
     ],
+    streak: {
+        current: { type: Number, default: 0 },
+        longest: { type: Number, default: 0 },
+        lastSolvedDate: { type: String, default: null }
+    },
+    activity: [
+        {
+            date: { type: String },
+            active: { type: Boolean, default: false },
+            count: { type: Number, default: 0 }
+        }
+    ],
     token: {
         type: String
     }

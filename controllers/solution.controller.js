@@ -21,6 +21,52 @@ const addSolution = async (req,res) => {
             })
         }
 
+
+        // streak
+
+        const getToday = () => {
+            return new Date().toISOString().split("T")[0]; 
+        };
+
+        const today = getToday();
+        const yesterday = new Date(Date.now() - 86400000).toISOString().split("T")[0];
+
+        if (!user.streak.lastSolvedDate) {
+            // first ever solve
+            user.streak.current = 1;
+        } 
+        else if (user.streak.lastSolvedDate === today) {
+            // already solved today → do nothing
+        } 
+        else if (user.streak.lastSolvedDate === yesterday) {
+            // continues streak
+            user.streak.current += 1;
+        } 
+        else {
+            // missed a day — reset
+            user.streak.current = 1;
+        }
+
+        user.streak.lastSolvedDate = today;
+        user.streak.longest = Math.max(user.streak.longest, user.streak.current);
+
+
+        // activity map
+        
+        const existingDay = user.activity.find(d => d.date === today);
+
+        if (existingDay) {
+            existingDay.active = true;
+            existingDay.count += 1;
+        } else {
+            user.activity.push({
+                date: today,
+                active: true
+            })
+        }
+
+        await user.save();
+
         // if a solution for a particular challenge exists, update it
         const solutionAlready = await SolutionModel.findOne({ 
             user: user?._id,
@@ -29,7 +75,8 @@ const addSolution = async (req,res) => {
         if (solutionAlready) {
             solutionAlready.solution = solution;
             await solutionAlready.save();
-            return res.status(204).json({
+            return res.status(200).json({
+                data: user,
                 message: 'solution updated',
                 success: true
             });
