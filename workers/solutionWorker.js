@@ -12,7 +12,6 @@ import { fileURLToPath } from "url";
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-// Now you can use __dirname
 const validatorsDir = path.join(__dirname, "../validators");
 const validators = {};
 if (fs.existsSync(validatorsDir)) {

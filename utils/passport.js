@@ -8,7 +8,7 @@ passport.use(
       clientID: process.env.GOOGLE_CLIENT_ID,
       clientSecret: process.env.GOOGLE_CLIENT_SECRET,
       // callbackURL: "https://reactplaygroundbe-production.up.railway.app/api/v1/auth/google/callback"
-      callbackURL: process.env.NODE_ENV === "dev" ? "http://localhost:4000/api/v1/auth/google/callback" : `${process.env.PROD_URL}/api/v1/auth/google/callback`
+      callbackURL: process.env.NODE_ENV === "dev" ? "http://localhost:4000/api/v1/auth/google/callback" : `https://rpg-production-5af2.up.railway.app/api/v1/auth/google/callback`
     },
     async (accessToken, refreshToken, profile, done) => {
       try {
