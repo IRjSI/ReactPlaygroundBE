@@ -65,8 +65,6 @@ const addSolution = async (req,res) => {
             })
         }
 
-        await user.save();
-
         // if a solution for a particular challenge exists, update it
         const solutionAlready = await SolutionModel.findOne({ 
             user: user?._id,
@@ -115,7 +113,7 @@ const getSolutions = async (req,res) => {
                 success: false
             })
         }
-
+        
         return res.status(200).json({
             data: user,
             message: "Solutions",
