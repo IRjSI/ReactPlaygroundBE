@@ -5,10 +5,9 @@ const SolutionSchema = new mongoose.Schema({
         type: mongoose.Schema.Types.ObjectId,
         ref: 'user'
     },
-    statement: {
-        type: String,
-        required: true,
-        unique: false
+    challenge: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'challenge'
     },
     solution: {
         type: String,
@@ -16,6 +15,8 @@ const SolutionSchema = new mongoose.Schema({
         unique: false
     }
 })
+
+SolutionSchema.index({ user: 1, challenge: 1 }, { unique: true });
 
 const SolutionModel = mongoose.model('solution', SolutionSchema);
 

@@ -20,4 +20,6 @@ const ActivitySchema = new mongoose.Schema({
 
 ActivitySchema.index({ userId: 1, date: 1 }, { unique: true });
 
-module.exports = mongoose.model("activity", ActivitySchema);
+const ActivityModel = mongoose.model("activity", ActivitySchema);
+
+export default ActivityModel;

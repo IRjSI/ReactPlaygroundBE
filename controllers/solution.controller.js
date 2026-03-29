@@ -19,7 +19,6 @@ const addSolution = async (req, res) => {
       });
     }
 
-    // ---------- DATE ----------
     const today = new Date();
     today.setHours(0, 0, 0, 0);
 
@@ -30,11 +29,10 @@ const addSolution = async (req, res) => {
       ? new Date(user.streak.lastSolvedDate)
       : null;
 
-    // ---------- STREAK ----------
     if (!lastSolved) {
       user.streak.current = 1;
     } else if (lastSolved.getTime() === today.getTime()) {
-      // already solved today → do nothing
+      // already solved today -> do nothing
     } else if (lastSolved.getTime() === yesterday.getTime()) {
       user.streak.current += 1;
     } else {
@@ -47,14 +45,12 @@ const addSolution = async (req, res) => {
       user.streak.current
     );
 
-    // ---------- ACTIVITY (NEW ONLY) ----------
     await Activity.updateOne(
       { userId: user._id, date: today },
       { $inc: { count: 1 } },
       { upsert: true }
     );
 
-    // ---------- SOLUTION ----------
     const existing = await SolutionModel.findOne({
       user: user._id,
       statement
