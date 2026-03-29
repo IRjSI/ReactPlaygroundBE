@@ -1,6 +1,20 @@
 import ChallengeModel from "../models/challenge.model.js"
 import SolutionModel from "../models/solution.model.js";
 
+/*
+{
+    data: [
+        {
+            _id: string,
+            statement: string,
+            difficulty: string,
+            solved: boolean
+        }
+    ],
+    success: boolean
+}
+*/
+
 const getChallenges = async (req, res) => {
   try {
     const userId = req.user._id;
