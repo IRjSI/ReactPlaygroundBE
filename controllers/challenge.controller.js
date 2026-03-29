@@ -22,11 +22,13 @@ const getChallenges = async (req, res) => {
     const [challenges, solved] = await Promise.all([
       ChallengeModel.find(),
       SolutionModel.find({ user: userId }).select("challenge -_id")
-    ]);r
+    ]);
 
     const solvedSet = new Set(
-      solved.map(s => s.challenge.toString())
-    );
+        solved
+            .filter(s => s.challenge) // remove bad data
+            .map(s => s.challenge.toString())
+        );
 
     const result = challenges.map(ch => ({
       ...ch.toObject(),
@@ -39,6 +41,7 @@ const getChallenges = async (req, res) => {
     });
 
   } catch (err) {
+    console.log(err);
     res.status(500).json({ success: false });
   }
 };

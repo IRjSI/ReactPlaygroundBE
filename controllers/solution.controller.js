@@ -9,11 +9,11 @@ import UserModel from "../models/user.model.js"
 */
 const addSolution = async (req, res) => {
   try {
-    const { solution, statement } = req.body;
+    const { solution } = req.body;
 
-    if (!solution || !statement) {
+    if (!solution) {
       return res.status(400).json({
-        message: "Solution/statement is required",
+        message: "Solution is required",
         success: false
       });
     }
