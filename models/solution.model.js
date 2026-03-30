@@ -3,10 +3,12 @@ import mongoose from "mongoose";
 const SolutionSchema = new mongoose.Schema({
     user: {
         type: mongoose.Schema.Types.ObjectId,
+        required: true,
         ref: 'user'
     },
     challenge: {
         type: mongoose.Schema.Types.ObjectId,
+        required: true,
         ref: 'challenge'
     },
     solution: {

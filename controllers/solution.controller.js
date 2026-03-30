@@ -1,3 +1,4 @@
+import ActivityModel from "../models/activity.model.js";
 import SolutionModel from "../models/solution.model.js"
 import UserModel from "../models/user.model.js"
 
@@ -9,11 +10,17 @@ import UserModel from "../models/user.model.js"
 */
 const addSolution = async (req, res) => {
   try {
-    const { solution } = req.body;
+    const { solution, challengeId } = req.body;
 
     if (!solution) {
       return res.status(400).json({
         message: "Solution is required",
+        success: false
+      });
+    }
+    if (!challengeId) {
+      return res.status(400).json({
+        message: "Challenge Id is required",
         success: false
       });
     }
@@ -60,7 +67,7 @@ const addSolution = async (req, res) => {
       );
 
       // activity
-      await Activity.updateOne(
+      await ActivityModel.updateOne(
         { userId: user._id, date: today },
         { $inc: { count: 1 } },
         { upsert: true }
