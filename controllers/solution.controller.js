@@ -33,16 +33,16 @@ const addSolution = async (req, res) => {
       });
     }
 
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
     const existing = await SolutionModel.findOne({
       user: user._id,
       challenge: challengeId
     });
 
     if (!existing) {
-      // streak logic
-      const today = new Date();
-      today.setHours(0, 0, 0, 0);
-
+      // streak
       const yesterday = new Date(today);
       yesterday.setDate(today.getDate() - 1);
 
@@ -52,11 +52,9 @@ const addSolution = async (req, res) => {
 
       if (!lastSolved) {
         user.streak.current = 1;
-      } else if (lastSolved.getTime() === today.getTime()) {
-        // do nothing
       } else if (lastSolved.getTime() === yesterday.getTime()) {
         user.streak.current += 1;
-      } else {
+      } else if (lastSolved.getTime() !== today.getTime()) {
         user.streak.current = 1;
       }
 
@@ -66,14 +64,6 @@ const addSolution = async (req, res) => {
         user.streak.current
       );
 
-      // activity
-      await ActivityModel.updateOne(
-        { userId: user._id, date: today },
-        { $inc: { count: 1 } },
-        { upsert: true }
-      );
-
-      // create solution
       await SolutionModel.create({
         user: user._id,
         challenge: challengeId,
@@ -83,6 +73,13 @@ const addSolution = async (req, res) => {
       existing.solution = solution;
       await existing.save();
     }
+
+    // activity
+    await ActivityModel.updateOne(
+      { userId: user._id, date: today },
+      { $inc: { count: 1 } },
+      { upsert: true }
+    );
 
     await user.save();
 

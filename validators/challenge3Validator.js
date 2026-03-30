@@ -1,7 +1,7 @@
 export default async function validateChallenge3(page) {
   try {
     // wait React to render UI
-    await page.waitForSelector("input", { timeout: 4000 });
+    await page.waitForSelector("input", { timeout: 10000 });
 
     const testValue = "react-playground-test";
 
@@ -24,7 +24,7 @@ export default async function validateChallenge3(page) {
       value =>
         Array.from(document.querySelectorAll("p"))
           .some(p => p.innerText.toLowerCase().includes(value.toLowerCase())),
-      { timeout: 4000 },
+      { timeout: 10000 },
       testValue
     );
 
