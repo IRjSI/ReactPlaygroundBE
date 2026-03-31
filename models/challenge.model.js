@@ -9,18 +9,6 @@ const ChallengeSchema = new mongoose.Schema({
     difficulty: {
         type: String
     },
-    solution: {
-        type: String
-    },
-    status: {
-        type: String,
-        enum: ["Done", "Not Yet"]
-    },
-    testcases: [
-        {
-            type: String
-        }
-    ]
 }, { timestamps: true })
 
 const ChallengeModel = mongoose.model('challenge', ChallengeSchema);

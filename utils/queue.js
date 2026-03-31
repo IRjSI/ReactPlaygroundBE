@@ -19,6 +19,7 @@ await redis.connect();
 async function enqueueSolution(solutionId, iframeDoc, challengeId) {
   console.log("challanage", challengeId)
   // Store the data with the solutionId as key
+  console.log("in queue:", solutionId)
   await redis.set(`solution:${solutionId}`, JSON.stringify({ solutionId, iframeDoc, challengeId }));
   // Notify that this specific solution is ready
   await redis.publish("solution_channel", JSON.stringify({ solutionId }));

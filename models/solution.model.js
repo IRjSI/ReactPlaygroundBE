@@ -3,12 +3,13 @@ import mongoose from "mongoose";
 const SolutionSchema = new mongoose.Schema({
     user: {
         type: mongoose.Schema.Types.ObjectId,
+        required: true,
         ref: 'user'
     },
-    statement: {
-        type: String,
+    challenge: {
+        type: mongoose.Schema.Types.ObjectId,
         required: true,
-        unique: false
+        ref: 'challenge'
     },
     solution: {
         type: String,
@@ -16,6 +17,8 @@ const SolutionSchema = new mongoose.Schema({
         unique: false
     }
 })
+
+SolutionSchema.index({ user: 1, challenge: 1 }, { unique: true });
 
 const SolutionModel = mongoose.model('solution', SolutionSchema);
 
