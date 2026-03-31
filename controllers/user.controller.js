@@ -1,3 +1,5 @@
+import ActivityModel from "../models/activity.model.js";
+import SolutionModel from "../models/solution.model.js";
 import UserModel from "../models/user.model.js";
 
 const userRegister = async (req,res) => {
@@ -81,8 +83,9 @@ const userLogin = async (req,res) => {
 
 const getUserInfo = async (req,res) => {
     // to get the current user
-    try {        
-        const user = await UserModel.findById(req.user?._id);
+    try {
+        const userId = req.user?._id;
+        const user = await UserModel.findById(userId);
         if (!user) {
             return res.status(404).json({
                 message: 'user not found',
@@ -90,8 +93,17 @@ const getUserInfo = async (req,res) => {
             })
         }
 
+        const userActivity = await ActivityModel.find({ userId });
+        const noOfChallenges = await SolutionModel.countDocuments({ user });
+
+        const userData = {
+            user,
+            userActivity,
+            noOfChallenges
+        }
+
         res.status(200).json({
-            data: user,
+            data: userData,
             message: 'user found',
             success: true
         })

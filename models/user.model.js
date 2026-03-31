@@ -25,33 +25,14 @@ const UserSchema = new mongoose.Schema({
     avatar: {
         type: String
     },
-    challenges: [
-        {
-            type: mongoose.Schema.Types.ObjectId,
-            ref: 'challenge'
-        }
-    ],
-    solutions: [
-        {
-            type: mongoose.Schema.Types.ObjectId,
-            ref: 'solution'
-        }
-    ],
+    token: {
+        type: String
+    },
     streak: {
         current: { type: Number, default: 0 },
         longest: { type: Number, default: 0 },
-        lastSolvedDate: { type: String, default: null }
+        lastSolvedDate: { type: Date, default: null }
     },
-    activity: [
-        {
-            date: { type: String },
-            active: { type: Boolean, default: false },
-            count: { type: Number, default: 0 }
-        }
-    ],
-    token: {
-        type: String
-    }
 }, { timestamps: true });
 
 UserSchema.pre("save", async function (next) {
