@@ -50,13 +50,19 @@ const addSolution = async (req, res) => {
         ? new Date(user.streak.lastSolvedDate)
         : null;
 
-      if (!lastSolved) {
-        user.streak.current = 1;
-      } else if (lastSolved.getTime() === yesterday.getTime()) {
-        user.streak.current += 1;
-      } else if (lastSolved.getTime() !== today.getTime()) {
-        user.streak.current = 1;
+      if (lastSolved) {
+        lastSolved.setHours(0, 0, 0, 0);
       }
+
+      if (!lastSolved) {
+          user.streak.current = 1;
+        } else if (lastSolved.getTime() === today.getTime()) {
+          // already solved today -> do nothing
+        } else if (lastSolved.getTime() === yesterday.getTime()) {
+          user.streak.current += 1;
+        } else {
+          user.streak.current = 1;
+        }
 
       user.streak.lastSolvedDate = today;
       user.streak.longest = Math.max(
