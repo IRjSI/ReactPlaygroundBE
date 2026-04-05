@@ -2,7 +2,7 @@ import ActivityModel from "../models/activity.model.js";
 import SolutionModel from "../models/solution.model.js"
 import UserModel from "../models/user.model.js"
 
-/*
+/* Response
 {
   message: string,
   success: boolean
@@ -104,7 +104,7 @@ const addSolution = async (req, res) => {
 };
 
 
-/*
+/* Response
 {
   data: [
     {

@@ -1,7 +1,7 @@
 import ChallengeModel from "../models/challenge.model.js"
 import SolutionModel from "../models/solution.model.js";
 
-/*
+/* Response
 {
     data: [
         {
@@ -46,6 +46,18 @@ const getChallenges = async (req, res) => {
   }
 };
 
+/* Response
+{
+    data: [
+        {
+            _id: string,
+            statement: string,
+            difficulty: string
+        }
+    ],
+    success: boolean
+}
+*/
 const getAllChallenges = async (req,res) => {
     // to get all the challenges in the database to display on the site
     try {
@@ -59,7 +71,6 @@ const getAllChallenges = async (req,res) => {
 
         res.status(200).json({
             data: challenges,
-            message: 'Challenges found',
             success: true
         })
     } catch (error) {
@@ -71,6 +82,9 @@ const getAllChallenges = async (req,res) => {
     }
 }
 
+/* 
+    NOT USED ANYMORE
+*/
 const getUserChallenges = async (req,res) => {
     // to get all the challenges the user have submitted(correct ones)
     try {

@@ -125,3 +125,63 @@ if (process.env.PUPPETEER_EXECUTABLE_PATH) {
 }
 ```
 The condition is `false` in local dev if env variables are not provided, but in production we are providing env variables with docker file, so `true`
+
+---
+
+## Flow Diagram
+
+```
+                ┌──────────────────────┐
+                │      Frontend        │
+                │  (React App)        │
+                └─────────┬────────────┘
+                          │
+            HTTP (submit) │
+                          ▼
+                ┌──────────────────────┐
+                │      Backend         │
+                │   (Express + WS)     │
+                └─────────┬────────────┘
+                          │
+                          │ Push job
+                          ▼
+                ┌──────────────────────┐
+                │       Worker         │
+                │ (Child Process)      │
+                └─────────┬────────────┘
+                          │
+                          │ Publish result
+                          ▼
+                ┌──────────────────────┐
+                │        Redis         │
+                │     (Pub/Sub)        │
+                └─────────┬────────────┘
+                          │
+                          │ Subscribe
+                          ▼
+                ┌──────────────────────┐
+                │      Backend         │
+                │ (Socket Router)      │
+                └─────────┬────────────┘
+                          │
+          WebSocket emit  │
+                          ▼
+                ┌──────────────────────┐
+                │      Frontend        │
+                │ (Receives result)    │
+                └──────────────────────┘
+```
+
+### Event Flow
+
+```
+t0: User submits code
+t1: Backend returns solutionId
+t2: Frontend registers socket
+t3: Worker starts execution
+t4: Worker finishes
+t5: Redis publishes result
+t6: Backend receives result
+t7: Backend emits via socket
+t8: Frontend updates UI
+```

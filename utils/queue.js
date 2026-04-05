@@ -17,7 +17,7 @@ redis.on("error", (err) => console.error("Redis Client Error:", err));
 await redis.connect();
 
 async function enqueueSolution(solutionId, iframeDoc, challengeId) {
-  console.log("challanage", challengeId)
+  console.log("challenge", challengeId)
   // Store the data with the solutionId as key
   console.log("in queue:", solutionId)
   await redis.set(`solution:${solutionId}`, JSON.stringify({ solutionId, iframeDoc, challengeId }));

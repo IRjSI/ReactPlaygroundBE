@@ -1,19 +1,24 @@
+// dotenv config
 import dotenv from "dotenv";
 dotenv.config();
+
 import express from "express";
 import cors from "cors";
 import jwt from "jsonwebtoken";
-import userRouter from "./routes/user.route.js";
-import { connectToDB } from "./db/config.js";
-import challengeRouter from "./routes/challenge.route.js";
-import solutionRouter from "./routes/solution.route.js";
-import submissionRouter from "./routes/submission.route.js";
 import { createServer } from "http";
 import { Server } from "socket.io";
 import { subscribeToResults } from "./workers/subscriber.js";
-
 import passport from "passport";
 import "./utils/passport.js";
+
+// db
+import { connectToDB } from "./db/config.js";
+
+// routes
+import userRouter from "./routes/user.route.js";
+import challengeRouter from "./routes/challenge.route.js";
+import solutionRouter from "./routes/solution.route.js";
+import submissionRouter from "./routes/submission.route.js";
 
 import { fork } from "child_process";
 import path from "path";
@@ -65,7 +70,6 @@ app.get(
     );
 
     // redirect to frontend with token or send JSON
-    // res.redirect(`https://react-playground-git-solution-rjss-projects.vercel.app/auth/success?token=${token}`);
     res.redirect(process.env.NODE_ENV === "dev" ? `http://localhost:5173/auth/success?token=${token}` : `https://reactpg.vercel.app/auth/success?token=${token}`);
   }
 );
@@ -121,6 +125,7 @@ server.listen(PORT || 5000, async () => {
     await subscribeToResults((solutionId, result) => {
       const socketId = clients.get(solutionId);
       if (socketId) {
+        // sends data to the specific client (data = {solutionId, result})
         io.to(socketId).emit("solutionResult", { solutionId, result });
         console.log("result sent to FE");
         clients.delete(solutionId);
