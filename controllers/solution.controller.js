@@ -1,6 +1,7 @@
-import ActivityModel from "../models/activity.model.js";
+import ActivityModel from "../models/activity.model.js"
 import SolutionModel from "../models/solution.model.js"
 import UserModel from "../models/user.model.js"
+import { getSignedS3Url, uploadToS3 } from "../utils/s3.js"
 
 /* Response
 {
@@ -32,6 +33,10 @@ const addSolution = async (req, res) => {
         success: false
       });
     }
+    
+    const key = `solutions/${user._id}/${challengeId}.js`;
+
+    await uploadToS3(key, solution);
 
     const today = new Date();
     today.setHours(0, 0, 0, 0);
@@ -73,10 +78,10 @@ const addSolution = async (req, res) => {
       await SolutionModel.create({
         user: user._id,
         challenge: challengeId,
-        solution
+        solution: key
       });
     } else {
-      existing.solution = solution;
+      existing.solution = key;
       await existing.save();
     }
 
@@ -121,9 +126,20 @@ const getSolutions = async (req,res) => {
         const solutions = await SolutionModel.find({
           user: req.user?._id
         }).select("challenge solution");
+
+        const updatedSolutions = await Promise.all(
+          solutions.map(async (sol) => {
+            const signedUrl = await getSignedS3Url(sol.solution);
+
+            return {
+              challenge: sol.challenge,
+              solution: signedUrl,
+            }
+          })
+        )
         
         return res.status(200).json({
-            data: solutions,
+            data: updatedSolutions,
             message: "Solutions",
             success: true
         })
