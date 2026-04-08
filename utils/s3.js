@@ -19,7 +19,7 @@ export async function uploadToS3(key, body) {
     })
   );
 
-  return `https://${process.env.S3_BUCKET}.s3.${process.env.AWS_REGION}.amazonaws.com/${key}`;
+  return key;
 }
 
 export async function getSignedS3Url(key) {
@@ -29,7 +29,7 @@ export async function getSignedS3Url(key) {
   });
 
   const url = await getSignedUrl(s3, command, {
-    expiresIn: 60, // seconds (1 min)
+    expiresIn: 60, // in seconds
   });
 
   return url;

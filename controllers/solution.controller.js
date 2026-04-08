@@ -123,36 +123,36 @@ const addSolution = async (req, res) => {
 const getSolutions = async (req,res) => {
     // to get the solutions of the user to display on the editor(frontend)
     try {
-        const solutions = await SolutionModel.find({
-          user: req.user?._id
-        }).select("challenge solution");
+      const solutions = await SolutionModel.find({
+        user: req.user?._id
+      }).select("challenge solution");
 
-        const updatedSolutions = await Promise.all(
-          solutions.map(async (sol) => {
-            const signedUrl = await getSignedS3Url(sol.solution);
+      const updatedSolutions = await Promise.all(
+        solutions.map(async (sol) => {
+          const signedUrl = await getSignedS3Url(sol.solution);
 
-            return {
-              challenge: sol.challenge,
-              solution: signedUrl,
-            }
-          })
-        )
-        
-        return res.status(200).json({
-            data: updatedSolutions,
-            message: "Solutions",
-            success: true
+          return {
+            challenge: sol.challenge,
+            solution: signedUrl,
+          }
         })
+      )
+        
+      return res.status(200).json({
+        data: updatedSolutions,
+        message: "Solutions",
+        success: true
+      })
     } catch (error) {
-        console.log(error);
-        return res.status(500).json({
-          message: "Internal Server Error",
-          success: false
-        });
+      console.log(error);
+      return res.status(500).json({
+        message: "Internal Server Error",
+        success: false
+      });
     }
 }
 
 export {
-    addSolution,
-    getSolutions
+  addSolution,
+  getSolutions
 }
