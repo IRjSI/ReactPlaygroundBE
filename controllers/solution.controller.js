@@ -1,6 +1,7 @@
-import ActivityModel from "../models/activity.model.js";
+import ActivityModel from "../models/activity.model.js"
 import SolutionModel from "../models/solution.model.js"
 import UserModel from "../models/user.model.js"
+import { getSignedS3Url, uploadToS3 } from "../utils/s3.js"
 
 /* Response
 {
@@ -32,51 +33,55 @@ const addSolution = async (req, res) => {
         success: false
       });
     }
-
+  
+    // streak
     const today = new Date();
     today.setHours(0, 0, 0, 0);
+
+    const yesterday = new Date(today);
+    yesterday.setDate(today.getDate() - 1);
+
+    const lastSolved = user.streak.lastSolvedDate
+      ? new Date(user.streak.lastSolvedDate)
+      : null;
+
+    if (lastSolved) {
+      lastSolved.setHours(0, 0, 0, 0);
+    }
+
+    if (!lastSolved) {
+        user.streak.current = 1;
+      } else if (lastSolved.getTime() === today.getTime()) {
+        // already solved today -> do nothing
+      } else if (lastSolved.getTime() === yesterday.getTime()) {
+        user.streak.current += 1;
+      } else {
+        user.streak.current = 1;
+      }
+
+    user.streak.lastSolvedDate = today;
+    user.streak.longest = Math.max(
+      user.streak.longest,
+      user.streak.current
+    );
 
     const existing = await SolutionModel.findOne({
       user: user._id,
       challenge: challengeId
     });
 
+    const key = `solutions/${user._id}/${challengeId}.js`;
+
+    await uploadToS3(key, solution);
+
     if (!existing) {
-      // streak
-      const yesterday = new Date(today);
-      yesterday.setDate(today.getDate() - 1);
-
-      const lastSolved = user.streak.lastSolvedDate
-        ? new Date(user.streak.lastSolvedDate)
-        : null;
-
-      if (lastSolved) {
-        lastSolved.setHours(0, 0, 0, 0);
-      }
-
-      if (!lastSolved) {
-          user.streak.current = 1;
-        } else if (lastSolved.getTime() === today.getTime()) {
-          // already solved today -> do nothing
-        } else if (lastSolved.getTime() === yesterday.getTime()) {
-          user.streak.current += 1;
-        } else {
-          user.streak.current = 1;
-        }
-
-      user.streak.lastSolvedDate = today;
-      user.streak.longest = Math.max(
-        user.streak.longest,
-        user.streak.current
-      );
-
       await SolutionModel.create({
         user: user._id,
         challenge: challengeId,
-        solution
+        solution: key
       });
     } else {
-      existing.solution = solution;
+      existing.solution = key;
       await existing.save();
     }
 
@@ -118,25 +123,36 @@ const addSolution = async (req, res) => {
 const getSolutions = async (req,res) => {
     // to get the solutions of the user to display on the editor(frontend)
     try {
-        const solutions = await SolutionModel.find({
-          user: req.user?._id
-        }).select("challenge solution");
-        
-        return res.status(200).json({
-            data: solutions,
-            message: "Solutions",
-            success: true
+      const solutions = await SolutionModel.find({
+        user: req.user?._id
+      }).select("challenge solution");
+
+      const updatedSolutions = await Promise.all(
+        solutions.map(async (sol) => {
+          const signedUrl = await getSignedS3Url(sol.solution);
+
+          return {
+            challenge: sol.challenge,
+            solution: signedUrl,
+          }
         })
+      )
+        
+      return res.status(200).json({
+        data: updatedSolutions,
+        message: "Solutions",
+        success: true
+      })
     } catch (error) {
-        console.log(error);
-        return res.status(500).json({
-          message: "Internal Server Error",
-          success: false
-        });
+      console.log(error);
+      return res.status(500).json({
+        message: "Internal Server Error",
+        success: false
+      });
     }
 }
 
 export {
-    addSolution,
-    getSolutions
+  addSolution,
+  getSolutions
 }
