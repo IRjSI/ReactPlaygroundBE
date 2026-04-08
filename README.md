@@ -185,3 +185,94 @@ t6: Backend receives result
 t7: Backend emits via socket
 t8: Frontend updates UI
 ```
+
+# S3
+
+To store user-submitted solutions efficiently and securely, this project uses **AWS S3** as an object storage layer instead of saving large code blobs directly in the database.
+
+---
+
+## Why S3?
+
+- Avoids storing large code strings in MongoDB
+- Scales better for file storage
+- Enables secure, controlled access to user data
+
+---
+
+## Architecture
+
+Frontend → Backend → S3 (store)  
+Frontend ← Backend ← Signed URL ← S3 (retrieve)
+
+---
+
+## Upload Flow
+
+1. User submits solution from frontend  
+2. Backend generates a unique key:
+   `solutions/<userId>/<challengeId>.js`
+3. Solution is uploaded to S3 using `PutObject`
+4. Only the key is stored in the database (not the actual code)
+
+---
+
+## Retrieval Flow
+
+1. Backend fetches solution keys from DB  
+2. For each key, backend generates a signed URL  
+3. Frontend uses the signed URL to fetch the actual code  
+
+---
+
+## What is a Signed URL?
+
+A signed URL is a temporary, pre-authorized link that allows access to a private S3 object without exposing AWS credentials.
+
+- Time-limited (e.g., 60 seconds)
+- Secure (validated by AWS signature)
+- Works even when bucket is private
+
+---
+
+## Security Model
+
+- S3 bucket has public access blocked
+- Only backend (via IAM user) has:
+  - s3:PutObject
+  - s3:GetObject
+- Frontend never interacts with S3 directly
+- Access is delegated via signed URLs
+
+---
+
+## Example
+
+### Stored in DB:
+{
+  "challenge": "challenge1",
+  "solution": "solutions/USER_ID/challenge1.js"
+}
+
+### Returned to frontend:
+{
+  "challenge": "challenge1",
+  "solution": "https://s3.amazonaws.com/...signed-url..."
+}
+
+---
+
+## Key Insight
+
+- S3 Key → file identifier (stored in DB)  
+- Signed URL → temporary access (sent to frontend)  
+
+---
+
+## Why this matters
+
+This approach enables:
+
+- Secure file access without exposing credentials  
+- Scalable storage for large user-generated content  
+- Clean separation between storage and application logic  
