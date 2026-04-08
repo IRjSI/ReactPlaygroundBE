@@ -33,48 +33,48 @@ const addSolution = async (req, res) => {
         success: false
       });
     }
-    
-    const key = `solutions/${user._id}/${challengeId}.js`;
-
-    await uploadToS3(key, solution);
-
+  
+    // streak
     const today = new Date();
     today.setHours(0, 0, 0, 0);
+
+    const yesterday = new Date(today);
+    yesterday.setDate(today.getDate() - 1);
+
+    const lastSolved = user.streak.lastSolvedDate
+      ? new Date(user.streak.lastSolvedDate)
+      : null;
+
+    if (lastSolved) {
+      lastSolved.setHours(0, 0, 0, 0);
+    }
+
+    if (!lastSolved) {
+        user.streak.current = 1;
+      } else if (lastSolved.getTime() === today.getTime()) {
+        // already solved today -> do nothing
+      } else if (lastSolved.getTime() === yesterday.getTime()) {
+        user.streak.current += 1;
+      } else {
+        user.streak.current = 1;
+      }
+
+    user.streak.lastSolvedDate = today;
+    user.streak.longest = Math.max(
+      user.streak.longest,
+      user.streak.current
+    );
 
     const existing = await SolutionModel.findOne({
       user: user._id,
       challenge: challengeId
     });
 
+    const key = `solutions/${user._id}/${challengeId}.js`;
+
+    await uploadToS3(key, solution);
+
     if (!existing) {
-      // streak
-      const yesterday = new Date(today);
-      yesterday.setDate(today.getDate() - 1);
-
-      const lastSolved = user.streak.lastSolvedDate
-        ? new Date(user.streak.lastSolvedDate)
-        : null;
-
-      if (lastSolved) {
-        lastSolved.setHours(0, 0, 0, 0);
-      }
-
-      if (!lastSolved) {
-          user.streak.current = 1;
-        } else if (lastSolved.getTime() === today.getTime()) {
-          // already solved today -> do nothing
-        } else if (lastSolved.getTime() === yesterday.getTime()) {
-          user.streak.current += 1;
-        } else {
-          user.streak.current = 1;
-        }
-
-      user.streak.lastSolvedDate = today;
-      user.streak.longest = Math.max(
-        user.streak.longest,
-        user.streak.current
-      );
-
       await SolutionModel.create({
         user: user._id,
         challenge: challengeId,

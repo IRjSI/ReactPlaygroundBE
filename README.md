@@ -276,3 +276,5 @@ This approach enables:
 - Secure file access without exposing credentials  
 - Scalable storage for large user-generated content  
 - Clean separation between storage and application logic  
+
+---
