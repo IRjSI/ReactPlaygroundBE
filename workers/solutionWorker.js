@@ -7,6 +7,7 @@ import * as Babel from '@babel/standalone';
 import fs from "fs";
 import path from "path";
 import { fileURLToPath } from "url";
+import { Worker } from "bullmq";
 
 // Convert ES module URL to file path
 const __filename = fileURLToPath(import.meta.url);
@@ -60,57 +61,12 @@ async function launchBrowser() {
   }
 }
 
-const subscriber = createClient({
-  url: process.env.REDIS_URL,
-  socket: {
-    tls: true,
-    rejectUnauthorized: false,
-  },
-});
+// BullMQ Worker
 
-const redis = createClient({
-  url: process.env.REDIS_URL,
-  socket: {
-    tls: true,
-    rejectUnauthorized: false,
-  },
-});
+const browser = await launchBrowser()
 
-redis.on("connect", () => console.log("Connected to Redis!"));
-redis.on("ready", () => console.log("Redis ready!"));
-
-subscriber.on("connect", () => console.log("Connected to subscriber!"));
-subscriber.on("ready", () => console.log("subscriber ready!"));
-
-redis.on("error", (err) => {
-  console.error("Redis Client Error:", err);
-});
-subscriber.on("error", (err) => {
-  console.error("Redis Subscriber Error:", err);
-});
-
-await subscriber.connect();
-await redis.connect();
-
-// subscribed to "solution_channel" to get the solution updates
-await subscriber.subscribe("solution_channel", async (message) => {
-  // get the solutionId
-  const { solutionId } = JSON.parse(message);
-  console.log("Processing solution:", solutionId);
-  
-  // get the specific solution data from redis that we 'set' while queueing
-  const solutionData = await redis.get(`solution:${solutionId}`);
-  if (!solutionData) {
-    console.warn("No solution found in redis for", solutionId);
-    return;
-  }
-
-  console.log("solutionData", JSON.parse(solutionData));
-  
-  // clean up
-  await redis.del(`solution:${solutionId}`);
-  
-  const { iframeDoc, challengeId } = JSON.parse(solutionData);
+const worker = new Worker("solutions", async (job) => {
+  const { solutionId, challengeId, iframeDoc } = job.data;
 
   // compile JSX → plain JS
   const compiledCode = Babel.transform(iframeDoc, { presets: ['react'] }).code;
@@ -139,8 +95,6 @@ await subscriber.subscribe("solution_channel", async (message) => {
   console.log('PLAYWRIGHT_BROWSERS_PATH:', process.env.PLAYWRIGHT_BROWSERS_PATH);
   
   // launch headless browser
-  const browser = await launchBrowser()
-
   const page = await browser.newPage();
   console.log("setup done")
 
@@ -156,29 +110,6 @@ await subscriber.subscribe("solution_channel", async (message) => {
 
   console.log(challengeId)
 
-  // validator for the challenge 2... need for other challenges
-  // try {
-  //   // wait for the button to appear
-  //   const button = await page.waitForSelector("button", { timeout: 2000 });
-
-  //   // get initial text
-  //   const beforeText = await page.evaluate(el => el.textContent?.toLowerCase().trim(), button);
-
-  //   // click button
-  //   await button.click();
-
-  //   // wait a small delay to allow React to update state
-  //   await page.waitForTimeout(100);
-
-  //   // get updated text
-  //   const afterText = await page.evaluate(el => el.textContent?.toLowerCase().trim(), button);
-
-  //   isValid = beforeText !== afterText && afterText === "click";
-
-  // } catch (err) {
-  //   console.error("Validation error:", err.message);
-  // }
-
   // for other challenges
   try {
     console.log("validators::", validators);
@@ -193,14 +124,29 @@ await subscriber.subscribe("solution_channel", async (message) => {
   }
 
   console.log("browser closing")
-  await browser.close();
+  await page.close();
   console.log("browser closed")
 
-  // publish result back to Redis
-  await redis.publish("results_channel", JSON.stringify({
+  return {
     solutionId,
     result: isValid ? "valid" : "invalid"
-  }));
+  };
+}, {
+  connection: {
+    url: process.env.REDIS_URL,
+    socket: {
+      tls: true,
+      rejectUnauthorized: false,
+    },
+  }
+})
 
-  console.log("done checking")
+worker.on('completed', (job, result) => {
+  const { solutionId, result: status } = result
+
+  // emit via socket
+});
+
+worker.on('failed', (job, err) => {
+  console.log('Job failed:', err);
 });
