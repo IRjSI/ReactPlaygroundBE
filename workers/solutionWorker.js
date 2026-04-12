@@ -65,7 +65,7 @@ async function launchBrowser() {
 
 const browser = await launchBrowser()
 
-const worker = new Worker("solutions", async (job) => {
+export const worker = new Worker("solutions", async (job) => {
   const { solutionId, challengeId, iframeDoc } = job.data;
 
   // compile JSX → plain JS
@@ -140,13 +140,3 @@ const worker = new Worker("solutions", async (job) => {
     },
   }
 })
-
-worker.on('completed', (job, result) => {
-  const { solutionId, result: status } = result
-
-  // emit via socket
-});
-
-worker.on('failed', (job, err) => {
-  console.log('Job failed:', err);
-});
