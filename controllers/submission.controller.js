@@ -1,3 +1,4 @@
+import SolutionModel from "../models/solution.model.js";
 import { enqueueSolution } from "../utils/queue.js";
 
 /* Response
@@ -6,12 +7,23 @@ import { enqueueSolution } from "../utils/queue.js";
 }
 */
 const checkSolution = async (req, res) => {
-  const { iframeDoc, challengeId } = req.body;
-  console.log("checking", challengeId)
-  const solutionId = Date.now().toString();
+  const { iframeDoc, validatorKey, challengeId } = req.body;
+  
+  const user = req.user?._id;
 
-  await enqueueSolution(solutionId, iframeDoc, challengeId);
-  return res.json({ solutionId });
+  const solution = await SolutionModel.findOneAndUpdate(
+    { user, challenge: challengeId },
+    {
+      $set: {
+        status: "pending",
+        solution: "null",
+      }
+    },
+    { new: true, upsert: true }
+  );
+
+  await enqueueSolution(solution._id.toString(), iframeDoc, validatorKey, challengeId, user);
+  return res.json({ solutionId: solution._id });
 };
 
 export { checkSolution };

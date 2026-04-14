@@ -1,29 +1,37 @@
+import { Queue } from "bullmq";
 import dotenv from "dotenv";
 dotenv.config();
 
-import { createClient } from "redis";
+const solution_queue = new Queue("solutions", {
+  connection: {
+    url: process.env.REDIS_URL,
+    socket: {
+      tls: true,
+      rejectUnauthorized: false,
+    },
+  }
+})
 
-const redis = createClient({
-  url: process.env.REDIS_URL,
-  socket: {
-    tls: true,
-    rejectUnauthorized: false,
-  },
-});
-redis.on("connect", () => console.log("Connected to Redis!"));
-redis.on("ready", () => console.log("Redis ready!"));
-redis.on("error", (err) => console.error("Redis Client Error:", err));
-
-await redis.connect();
-
-async function enqueueSolution(solutionId, iframeDoc, challengeId) {
-  console.log("challenge", challengeId)
+async function enqueueSolution(solutionId, iframeDoc, validatorKey, challengeId, userId) {
+  console.log("challenge", validatorKey)
   // Store the data with the solutionId as key
   console.log("in queue:", solutionId)
-  await redis.set(`solution:${solutionId}`, JSON.stringify({ solutionId, iframeDoc, challengeId }));
-  // Notify that this specific solution is ready
-  await redis.publish("solution_channel", JSON.stringify({ solutionId }));
-  return solutionId;
+
+  // replaced by BullMQ
+  await solution_queue.add("validate", {
+    solutionId,
+    iframeDoc,
+    validatorKey,
+    challengeId,
+    userId
+  }, {
+    attempts: 3,
+    backoff: {
+      type: 'exponential',
+      delay: 2000,
+    },
+    timeout: 10000,
+  })
 }
 
 export { enqueueSolution };

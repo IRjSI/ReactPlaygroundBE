@@ -15,6 +15,15 @@ const SolutionSchema = new mongoose.Schema({
         type: String,
         required: true,
         unique: false
+    },
+    status: {
+        type: String,
+        enum: ["pending", "processing", "completed", "failed"],
+        default: "pending"
+    },
+    result: {
+        type: String,
+        enum: ["valid", "invalid"],
     }
 })
 

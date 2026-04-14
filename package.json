@@ -16,6 +16,7 @@
     "@aws-sdk/s3-request-presigner": "^3.1025.0",
     "@babel/standalone": "^7.28.4",
     "bcrypt": "^5.1.1",
+    "bullmq": "^5.73.1",
     "concurrently": "^9.2.1",
     "cors": "^2.8.5",
     "dotenv": "^17.2.3",

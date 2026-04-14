@@ -278,3 +278,10 @@ This approach enables:
 - Clean separation between storage and application logic  
 
 ---
+
+
+
+
+# BullMQ
+
+BullMQ ALWAYS listens to the queue. No need of Pub/Sub.
