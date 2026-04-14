@@ -21,14 +21,17 @@ const getChallenges = async (req, res) => {
 
     const [challenges, solved] = await Promise.all([
       ChallengeModel.find(),
-      SolutionModel.find({ user: userId }).select("challenge -_id")
+      SolutionModel.find({
+        user: userId,
+        result: "valid"
+      }).select("challenge -_id")
     ]);
 
     const solvedSet = new Set(
-        solved
-            .filter(s => s.challenge) // remove bad data
-            .map(s => s.challenge.toString())
-        );
+      solved
+        .filter(s => s.challenge)
+        .map(s => s.challenge.toString())
+    );
 
     const result = challenges.map(ch => ({
       ...ch.toObject(),

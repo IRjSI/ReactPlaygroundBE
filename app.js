@@ -7,7 +7,6 @@ import cors from "cors";
 import jwt from "jsonwebtoken";
 import { createServer } from "http";
 import { Server } from "socket.io";
-import { subscribeToResults } from "./workers/subscriber.js";
 import passport from "passport";
 import "./utils/passport.js";
 
@@ -23,6 +22,7 @@ import submissionRouter from "./routes/submission.route.js";
 import { fork } from "child_process";
 import path from "path";
 import { fileURLToPath } from "url";
+import { attachWorkerEvents } from "./workers/workerEvents.js";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -106,33 +106,27 @@ io.on("connection", (socket) => {
   });
 });
 
-// Subscribe to worker results
-// await subscribeToResults((solutionId, result) => {
-//   const socketId = clients.get(solutionId);
-//   if (socketId) {
-//     io.to(socketId).emit("solutionResult", { solutionId, result });
-//     console.log("result sent to FE")
-//     clients.delete(solutionId);
-//   }
-// });
+attachWorkerEvents(io, clients);
 
 const PORT = process.env.PORT
 
 server.listen(PORT || 5000, async () => {
   console.log('Server listening on port', PORT || 5000);
+
   
-  try {
-    await subscribeToResults((solutionId, result) => {
-      const socketId = clients.get(solutionId);
-      if (socketId) {
-        // sends data to the specific client (data = {solutionId, result})
-        io.to(socketId).emit("solutionResult", { solutionId, result });
-        console.log("result sent to FE");
-        clients.delete(solutionId);
-      }
-    });
-    console.log("✅ Redis subscriber connected");
-  } catch (error) {
-    console.error("❌ Redis subscriber error:", error);
-  }
+  
+  // try {
+  //   await subscribeToResults((solutionId, result) => {
+  //     const socketId = clients.get(solutionId);
+  //     if (socketId) {
+  //       // sends data to the specific client (data = {solutionId, result})
+  //       io.to(socketId).emit("solutionResult", { solutionId, result });
+  //       console.log("result sent to FE");
+  //       clients.delete(solutionId);
+  //     }
+  //   });
+  //   console.log("✅ Redis subscriber connected");
+  // } catch (error) {
+  //   console.error("❌ Redis subscriber error:", error);
+  // }
 });

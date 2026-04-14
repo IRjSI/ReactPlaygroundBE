@@ -12,8 +12,8 @@ const solution_queue = new Queue("solutions", {
   }
 })
 
-async function enqueueSolution(solutionId, iframeDoc, challengeId) {
-  console.log("challenge", challengeId)
+async function enqueueSolution(solutionId, iframeDoc, validatorKey, challengeId, userId) {
+  console.log("challenge", validatorKey)
   // Store the data with the solutionId as key
   console.log("in queue:", solutionId)
 
@@ -21,7 +21,9 @@ async function enqueueSolution(solutionId, iframeDoc, challengeId) {
   await solution_queue.add("validate", {
     solutionId,
     iframeDoc,
-    challengeId
+    validatorKey,
+    challengeId,
+    userId
   }, {
     attempts: 3,
     backoff: {

@@ -1,7 +1,6 @@
 import dotenv from "dotenv";
 dotenv.config();
 
-import { createClient } from "redis";
 import puppeteer from "puppeteer";
 import * as Babel from '@babel/standalone';
 import fs from "fs";
@@ -29,7 +28,7 @@ if (fs.existsSync(validatorsDir)) {
 async function launchBrowser() {
   try {
     console.log('Launching Puppeteer browser...');
-    
+
     const launchOptions = {
       headless: true,
       args: [
@@ -49,12 +48,12 @@ async function launchBrowser() {
     if (process.env.PUPPETEER_EXECUTABLE_PATH) {
       launchOptions.executablePath = process.env.PUPPETEER_EXECUTABLE_PATH;
     }
-    
+
     const browser = await puppeteer.launch(launchOptions);
 
     console.log('✅ Puppeteer browser launched successfully');
     return browser;
-    
+
   } catch (err) {
     console.error('❌ Failed to launch Puppeteer:', err.message);
     throw err;
@@ -65,8 +64,10 @@ async function launchBrowser() {
 
 const browser = await launchBrowser()
 
+console.log("🚀 WORKER CREATED");
+
 export const worker = new Worker("solutions", async (job) => {
-  const { solutionId, challengeId, iframeDoc } = job.data;
+  const { solutionId, validatorKey, iframeDoc, challengeId, userId } = job.data;
 
   // compile JSX → plain JS
   const compiledCode = Babel.transform(iframeDoc, { presets: ['react'] }).code;
@@ -93,7 +94,7 @@ export const worker = new Worker("solutions", async (job) => {
 
   console.log('Checking browser paths...');
   console.log('PLAYWRIGHT_BROWSERS_PATH:', process.env.PLAYWRIGHT_BROWSERS_PATH);
-  
+
   // launch headless browser
   const page = await browser.newPage();
   console.log("setup done")
@@ -108,16 +109,17 @@ export const worker = new Worker("solutions", async (job) => {
 
   console.log("reached validity check")
 
-  console.log(challengeId)
+  console.log(validatorKey)
 
   // for other challenges
   try {
     console.log("validators::", validators);
-    console.log("validators challengeId::", validators[challengeId]);
-    if (validators[challengeId]) {
-      isValid = await validators[challengeId](page); //eg. validateChallenge2(page)
+    console.log("validators challengeId::", validators[validatorKey]);
+    if (validators[validatorKey]) {
+      isValid = await validators[validatorKey](page); //eg. validateChallenge2(page)
+      console.log("isValid:", isValid);
     } else {
-      console.warn(`No validator found for ${challengeId}, marking invalid`);
+      console.warn(`No validator found for ${validatorKey}, marking invalid`);
     }
   } catch (err) {
     console.error("Validator error:", err.message);
@@ -129,6 +131,8 @@ export const worker = new Worker("solutions", async (job) => {
 
   return {
     solutionId,
+    challengeId,
+    userId,
     result: isValid ? "valid" : "invalid"
   };
 }, {
