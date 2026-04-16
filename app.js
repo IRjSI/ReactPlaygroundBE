@@ -113,20 +113,4 @@ const PORT = process.env.PORT
 server.listen(PORT || 5000, async () => {
   console.log('Server listening on port', PORT || 5000);
 
-  
-  
-  // try {
-  //   await subscribeToResults((solutionId, result) => {
-  //     const socketId = clients.get(solutionId);
-  //     if (socketId) {
-  //       // sends data to the specific client (data = {solutionId, result})
-  //       io.to(socketId).emit("solutionResult", { solutionId, result });
-  //       console.log("result sent to FE");
-  //       clients.delete(solutionId);
-  //     }
-  //   });
-  //   console.log("✅ Redis subscriber connected");
-  // } catch (error) {
-  //   console.error("❌ Redis subscriber error:", error);
-  // }
 });

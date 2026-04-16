@@ -279,9 +279,17 @@ This approach enables:
 
 ---
 
+# Migration to BullMQ
 
+Initially, the project used raw Redis Pub/Sub to manage the background worker flow. We have since shifted to **BullMQ** to make queue management significantly more robust.
 
+## Why We Shifted
+- **No Manual Pub/Sub Needed:** Instead of manually maintaining Redis Pub/Sub channels to connect background workers back to the main Node process, BullMQ inherently tracking job lifecycle states. BullMQ ALWAYS listens to the queue and naturally emits events.
+- **Reliability:** BullMQ provides built-in mechanisms for stalled jobs, retries, concurrency limits, and accurate error reporting.
+- **Simplified Architecture:** The separation of queues and events simplifies our websocket flow by relying on standard Job APIs rather than raw redis message parsing.
 
-# BullMQ
-
-BullMQ ALWAYS listens to the queue. No need of Pub/Sub.
+## How It Works Now
+1. **Queueing:** The backend pushes execution jobs directly to the BullMQ `solutions` queue.
+2. **Workers:** `solutionWorker.js` automatically picks up jobs and processes the React code using Puppeteer.
+3. **Queue Events:** The backend uses BullMQ's `QueueEvents` (in `workerEvents.js`) to natively listen for `'completed'` and `'failed'` events.
+4. **WebSocket Sync:** Upon the `'completed'` event, the backend resolves the initial job, conditionally updates the MongoDB status, uploads the valid/invalid code logic to S3, and seamlessly emits the final outcome back to the React UI via Socket.io.
