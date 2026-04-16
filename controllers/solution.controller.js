@@ -26,8 +26,10 @@ const getSolutions = async (req, res) => {
           if (sol.solution && sol.solution !== "null") {
             try {
               signedUrl = await getSignedS3Url(sol.solution);
+              console.log(signedUrl)
             } catch (err) {
               console.error("Error fetching S3 URL for key:", sol.solution);
+              console.error("Error fetching S3 URL Error:", err.message);
             }
           }
 
