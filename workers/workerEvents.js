@@ -30,16 +30,23 @@ export function attachWorkerEvents(io, clients) {
       const { iframeDoc } = job.data;
       const key = `solutions/${userId}/${challengeId}.js`;
 
-      console.log('Uploading solution to S3:', key);
+      if (status === "valid") {
+        console.log('Uploading solution to S3:', key);
+        await uploadToS3(key, iframeDoc);
 
-      // Save to S3 regardless of whether valid or invalid so user doesn't lose progress
-      await uploadToS3(key, iframeDoc);
+        await SolutionModel.findByIdAndUpdate(solutionId, {
+          status: "completed",
+          result: status,
+          solution: key
+        });
+      } else {
+        const existingSolution = await SolutionModel.findById(solutionId).select("result");
 
-      await SolutionModel.findByIdAndUpdate(solutionId, {
-        status: "completed",
-        result: status,
-        solution: key
-      });
+        await SolutionModel.findByIdAndUpdate(solutionId, {
+          status: "completed",
+          ...(existingSolution?.result !== "valid" ? { result: status } : {}),
+        });
+      }
 
       if (socketId) {
         io.to(socketId).emit("solutionResult", {

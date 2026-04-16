@@ -16,8 +16,10 @@ const checkSolution = async (req, res) => {
     {
       $set: {
         status: "pending",
+      },
+      $setOnInsert: {
         solution: "null",
-      }
+      },
     },
     { new: true, upsert: true }
   );
