@@ -64,7 +64,7 @@ async function launchBrowser() {
 
 const browser = await launchBrowser()
 
-console.log("🚀 WORKER CREATED");
+console.log("WORKER CREATED");
 
 export const worker = new Worker("solutions", async (job) => {
   const { solutionId, validatorKey, iframeDoc, challengeId, userId } = job.data;

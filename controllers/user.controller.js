@@ -94,7 +94,7 @@ const getUserInfo = async (req,res) => {
         }
 
         const userActivity = await ActivityModel.find({ userId });
-        const noOfChallenges = await SolutionModel.countDocuments({ user });
+        const noOfChallenges = await SolutionModel.countDocuments({ user, result: "valid" });
 
         const userData = {
             user,

@@ -2,6 +2,7 @@ import SolutionModel from "../models/solution.model.js";
 import { uploadToS3 } from "../utils/s3.js";
 import { QueueEvents, Queue, Job } from "bullmq";
 import dotenv from "dotenv";
+import { updateUserStreak } from "../controllers/submission.controller.js";
 
 dotenv.config();
 
@@ -34,11 +35,13 @@ export function attachWorkerEvents(io, clients) {
         console.log('Uploading solution to S3:', key);
         await uploadToS3(key, iframeDoc);
 
-        await SolutionModel.findByIdAndUpdate(solutionId, {
+        const existingSolution = await SolutionModel.findByIdAndUpdate(solutionId, {
           status: "completed",
           result: status,
           solution: key
-        });
+        }, { new: false }).select("result");
+
+        await updateUserStreak(userId);
       } else {
         const existingSolution = await SolutionModel.findById(solutionId).select("result");
 
