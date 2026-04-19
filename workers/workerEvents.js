@@ -14,7 +14,7 @@ const connection = {
   },
 };
 
-const queueEvents = new QueueEvents("solutions", { connection });
+const queueEvents = new QueueEvents("solutions", { connection }); // listener for job lifecycle events
 const solutionQueue = new Queue("solutions", { connection });
 
 console.log('worker events reached')
