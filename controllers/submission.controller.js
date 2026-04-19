@@ -1,5 +1,6 @@
 import SolutionModel from "../models/solution.model.js";
 import UserModel from "../models/user.model.js";
+import ActivityModel from "../models/activity.model.js";
 import { enqueueSolution } from "../utils/queue.js";
 
 
@@ -73,4 +74,26 @@ const updateUserStreak = async (userId, solvedAt = new Date()) => {
   return user.streak;
 };
 
-export { checkSolution, updateUserStreak };
+const formatDateToString = (date) => {
+  return date.toISOString().split('T')[0]; // Returns YYYY-MM-DD
+};
+
+const updateUserActivity = async (userId, solvedAt = new Date()) => {
+  try {
+    const today = startOfUtcDay(solvedAt);
+    const dateString = formatDateToString(today);
+
+    const activity = await ActivityModel.findOneAndUpdate(
+      { userId, date: dateString },
+      { $inc: { count: 1 } },
+      { new: true, upsert: true }
+    );
+
+    return activity;
+  } catch (error) {
+    console.error("Error updating user activity:", error);
+    return null;
+  }
+};
+
+export { checkSolution, updateUserStreak, updateUserActivity };
