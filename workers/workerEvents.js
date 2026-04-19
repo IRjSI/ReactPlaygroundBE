@@ -42,7 +42,7 @@ export function attachWorkerEvents(io, clients) {
         }, { new: false }).select("result");
 
         await updateUserStreak(userId);
-        
+        await updateUserActivity(userId);
       } else {
         const existingSolution = await SolutionModel.findById(solutionId).select("result");
 
@@ -51,8 +51,6 @@ export function attachWorkerEvents(io, clients) {
           ...(existingSolution?.result !== "valid" ? { result: status } : {}),
         });
       }
-      
-      await updateUserActivity(userId);
 
       if (socketId) {
         io.to(socketId).emit("solutionResult", {
