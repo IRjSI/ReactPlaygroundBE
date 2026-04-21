@@ -71,7 +71,7 @@ const getSolutionByChallengeId = async (req, res) => {
       const solution = await SolutionModel.find({
         user: req.user?._id,
         challenge: challengeId
-      }).select("challenge solution");
+      }).select("challenge solution result");
       
       if (solution.length === 0) {
         return res.status(200).json({
@@ -95,6 +95,7 @@ const getSolutionByChallengeId = async (req, res) => {
         return {
           challenge: solution[0].challenge,
           solution: signedUrl,
+          result: solution[0].result
         }
       }
       const result = await updatedSolution();

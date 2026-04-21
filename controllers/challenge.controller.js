@@ -19,28 +19,38 @@ const getChallenges = async (req, res) => {
   try {
     const userId = req.user._id;
 
-    const [challenges, solved] = await Promise.all([
-      ChallengeModel.find(),
-      SolutionModel.find({
+    const challenges = await ChallengeModel.find();
+
+    const solutions = await SolutionModel.find({
         user: userId,
-        result: "valid"
-      }).select("challenge -_id")
-    ]);
+    }).select("challenge result");
 
-    const solvedSet = new Set(
-      solved
-        .filter(s => s.challenge)
-        .map(s => s.challenge.toString())
-    );
+    const resultMap = new Map();
 
-    const result = challenges.map(ch => ({
-      ...ch.toObject(),
-      solved: solvedSet.has(ch._id.toString())
-    }));
+    solutions.forEach(s => {
+        if (!s.challenge) return;
+
+        const chId = s.challenge.toString();
+
+        if (!resultMap.has(chId) || s.result === "valid") {
+            resultMap.set(chId, s.result);
+        }
+    });
+
+    const result = challenges.map(ch => {
+        const chId = ch._id.toString();
+        const res = resultMap.get(chId);
+
+        return {
+            ...ch.toObject(),
+            solved: res === "valid",
+            result: res || null,
+        };
+    });
 
     res.status(200).json({
-      data: result,
-      success: true
+        data: result,
+        success: true
     });
 
   } catch (err) {
