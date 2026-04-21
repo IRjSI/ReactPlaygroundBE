@@ -54,6 +54,58 @@ const getSolutions = async (req, res) => {
     }
 }
 
+/* Response
+{
+  data: [
+    {
+      challenge: string,
+      solution: string
+    }
+  ],
+  success: boolean
+}
+*/
+const getSolutionByChallengeId = async (req, res) => {
+    const { challengeId } = req.params;
+    try {
+      const solution = await SolutionModel.find({
+        user: req.user?._id,
+        challenge: challengeId
+      }).select("challenge solution");
+
+      const updatedSolution = async () => {
+        let signedUrl = null;
+        if (solution[0].solution && solution[0].solution !== "null") {
+          try {
+            signedUrl = await getSignedS3Url(solution[0].solution);
+            console.log(signedUrl)
+          } catch (err) {
+            console.error("Error fetching S3 URL for key:", sol.solution);
+            console.error("Error fetching S3 URL Error:", err.message);
+          }
+        }
+
+        return {
+          challenge: solution[0].challenge,
+          solution: signedUrl,
+        }
+      }
+      const result = await updatedSolution();
+
+      return res.status(200).json({
+        data: result,
+        message: "Solution",
+        success: true
+      })
+    } catch (error) {
+      console.log(error);
+      return res.status(500).json({
+        message: "Internal Server Error",
+        success: false
+      });
+    }
+}
 export {
-  getSolutions
+  getSolutions,
+  getSolutionByChallengeId
 }

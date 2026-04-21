@@ -55,6 +55,56 @@ const getChallenges = async (req, res) => {
         {
             _id: string,
             statement: string,
+            difficulty: string,
+            solved: boolean
+        }
+    ],
+    success: boolean
+}
+*/
+
+const getChallengeById = async (req, res) => {
+  try {
+    const userId = req.user._id;
+    const { challengeId } = req.params;
+
+    const [challenge, solved] = await Promise.all([
+      ChallengeModel.findById(challengeId),
+      SolutionModel.find({
+        user: userId,
+        challenge: challengeId,
+      }).select("result -_id")
+    ]);
+
+    const result = solved[0].result;
+
+    // const result = challenges.map(ch => ({
+    //   ...ch.toObject(),
+    //   solved: solvedSet.has(ch._id.toString())
+    // }));
+
+    const data = {
+        challenge,
+        result
+    };
+
+    res.status(200).json({
+      data: data,
+      success: true
+    });
+
+  } catch (err) {
+    console.log(err);
+    res.status(500).json({ success: false });
+  }
+};
+
+/* Response
+{
+    data: [
+        {
+            _id: string,
+            statement: string,
             difficulty: string
         }
     ],
@@ -174,6 +224,7 @@ const createChallenge = async (req,res) => {
 
 export {
     getChallenges,
+    getChallengeById,
     getAllChallenges,
     getUserChallenges,
     createChallenge
