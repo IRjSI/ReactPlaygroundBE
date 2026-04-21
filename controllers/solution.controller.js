@@ -72,6 +72,13 @@ const getSolutionByChallengeId = async (req, res) => {
         user: req.user?._id,
         challenge: challengeId
       }).select("challenge solution");
+      
+      if (solution.length === 0) {
+        return res.status(200).json({
+          message: "Solution does not exist",
+          success: true
+        })
+      }
 
       const updatedSolution = async () => {
         let signedUrl = null;

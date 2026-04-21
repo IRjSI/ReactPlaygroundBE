@@ -76,7 +76,10 @@ const getChallengeById = async (req, res) => {
       }).select("result -_id")
     ]);
 
-    const result = solved[0].result;
+    let result = "invalid";
+    if (solved.length !== 0) {
+        result = solved[0].result;
+    }
 
     // const result = challenges.map(ch => ({
     //   ...ch.toObject(),
