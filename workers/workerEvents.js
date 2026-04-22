@@ -3,6 +3,7 @@ import { uploadToS3 } from "../utils/s3.js";
 import { QueueEvents, Queue, Job } from "bullmq";
 import dotenv from "dotenv";
 import { updateUserStreak, updateUserActivity } from "../controllers/submission.controller.js";
+import { getRedisClient } from "../utils/redis.js";
 
 dotenv.config();
 
@@ -24,6 +25,8 @@ export function attachWorkerEvents(io, clients) {
     const { solutionId, result: status, challengeId, userId } = returnvalue;
     const socketId = clients.get(solutionId);
 
+    const redis = await getRedisClient();
+
     try {
       const job = await Job.fromId(solutionQueue, jobId);
       if (!job) return;
@@ -43,6 +46,9 @@ export function attachWorkerEvents(io, clients) {
 
         await updateUserStreak(userId);
         await updateUserActivity(userId);
+
+        await redis?.del(`cache:user:${userId}:info`);
+        
       } else {
         const existingSolution = await SolutionModel.findById(solutionId).select("result");
 

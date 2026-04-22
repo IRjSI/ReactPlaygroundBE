@@ -85,7 +85,7 @@ const userLogin = async (req,res) => {
 const getUserInfo = async (req,res) => {
     // to get the current user
     try {
-        const userId = req.user?._id;
+        const userId = req.user?._id.toString();
 
         // cache key
         const cacheKey = `cache:user:${userId}:info`;
@@ -115,8 +115,10 @@ const getUserInfo = async (req,res) => {
             })
         }
 
-        const userActivity = await ActivityModel.find({ userId }).lean();
-        const noOfChallenges = await SolutionModel.countDocuments({ user, result: "valid" }).lean();
+        const [userActivity, noOfChallenges] = await Promise.all([
+            ActivityModel.find({ userId }).lean(),
+            SolutionModel.countDocuments({ user: userId, result: "valid" })
+        ]);
 
         const userData = {
             user,
