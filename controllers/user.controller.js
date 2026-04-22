@@ -1,6 +1,7 @@
 import ActivityModel from "../models/activity.model.js";
 import SolutionModel from "../models/solution.model.js";
 import UserModel from "../models/user.model.js";
+import { getCached, setCached } from "../utils/cache.js";
 import { getRedisClient } from "../utils/redis.js";
 
 const userRegister = async (req,res) => {
@@ -90,19 +91,14 @@ const getUserInfo = async (req,res) => {
         // cache key
         const cacheKey = `cache:user:${userId}:info`;
 
-        const redis = await getRedisClient();
-
-        if (redis) {
-            // ask redis if already present
-            const cachedUserData = await redis.get(cacheKey);
-    
-            if (cachedUserData) {
-                return res.status(200).json({
-                    data: JSON.parse(cachedUserData),
-                    message: 'user found',
-                    success: true
-                })
-            }
+        const cachedUserData = await getCached(cacheKey);
+        
+        if (cachedUserData) {
+            return res.status(200).json({
+                data: cachedUserData,
+                message: 'user found',
+                success: true
+            });
         }
         
         // else 
@@ -127,11 +123,7 @@ const getUserInfo = async (req,res) => {
         }
 
         // set in redis
-        if (redis) {
-            await redis.set(cacheKey, JSON.stringify(userData), {
-                EX: 300
-            });
-        }
+        await setCached(cacheKey, userData, 300);
 
         res.status(200).json({
             data: userData,
