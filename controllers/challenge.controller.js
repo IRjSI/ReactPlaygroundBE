@@ -59,20 +59,6 @@ const getChallenges = async (req, res) => {
   }
 };
 
-/* Response
-{
-    data: [
-        {
-            _id: string,
-            statement: string,
-            difficulty: string,
-            solved: boolean
-        }
-    ],
-    success: boolean
-}
-*/
-
 const getChallengeById = async (req, res) => {
   try {
     const userId = req.user._id;
