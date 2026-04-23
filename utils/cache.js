@@ -2,7 +2,7 @@ import { getRedisClient } from "./redis.js";
 
 export const getCached = async (key) => {
     try {
-        const redis = await getRedisClient();
+        const redis = getRedisClient;
         if (!redis) return null;
 
         const cached = await redis.get(key);
@@ -17,7 +17,7 @@ export const getCached = async (key) => {
 
 export const setCached = async (key, value, ttl = 300) => {
     try {
-        const redis = await getRedisClient();
+        const redis = getRedisClient;
         if (!redis) return null;
 
         await redis.set(key, JSON.stringify(value), {
@@ -30,7 +30,7 @@ export const setCached = async (key, value, ttl = 300) => {
 
 export const deleteCached = async (key) => {
     try {
-        const redis = await getRedisClient();
+        const redis = getRedisClient;
         if (!redis) return null;
 
         await redis.del(key);

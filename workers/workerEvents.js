@@ -3,7 +3,6 @@ import { uploadToS3 } from "../utils/s3.js";
 import { QueueEvents, Queue, Job } from "bullmq";
 import dotenv from "dotenv";
 import { updateUserStreak, updateUserActivity } from "../controllers/submission.controller.js";
-import { getRedisClient } from "../utils/redis.js";
 import { deleteCached } from "../utils/cache.js";
 
 dotenv.config();

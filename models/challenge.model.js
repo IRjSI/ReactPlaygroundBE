@@ -9,6 +9,9 @@ const ChallengeSchema = new mongoose.Schema({
     difficulty: {
         type: String
     },
+    validatorCode: {
+        type: String
+    },
 }, { timestamps: true })
 
 const ChallengeModel = mongoose.model('challenge', ChallengeSchema);

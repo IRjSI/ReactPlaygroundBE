@@ -186,7 +186,7 @@ const getUserChallenges = async (req,res) => {
 const createChallenge = async (req,res) => {
     // to create a challenge
     try {
-        const { statement, difficulty, solution, testcases } = req.body;
+        const { statement, difficulty, solution, testcases, validatorCode } = req.body;
         if (!statement) {
             return res.status(400).json({
                 message: "challenge required",
@@ -198,7 +198,8 @@ const createChallenge = async (req,res) => {
             statement,
             difficulty,
             solution,
-            testcases
+            testcases,
+            validatorCode
         })
         if (!challenge) {
             return res.status(400).json({
