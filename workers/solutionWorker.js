@@ -14,7 +14,6 @@ connectToDB();
 const AsyncFunction = Object.getPrototypeOf(async function () { }).constructor;
 
 
-
 async function launchBrowser() {
   try {
     console.log('Launching Puppeteer browser...');
