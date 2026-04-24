@@ -3,7 +3,7 @@ dotenv.config();
 
 import { createClient } from "redis";
 
-const client = createClient({
+export const getRedisClient  = createClient({
   url: process.env.REDIS_URL,
   socket: {
     tls: true,
@@ -11,5 +11,4 @@ const client = createClient({
   },
 });
 
-client.connect();
-
+getRedisClient .connect();
