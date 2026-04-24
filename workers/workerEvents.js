@@ -3,6 +3,7 @@ import { uploadToS3 } from "../utils/s3.js";
 import { QueueEvents, Queue, Job } from "bullmq";
 import dotenv from "dotenv";
 import { updateUserStreak, updateUserActivity } from "../controllers/submission.controller.js";
+import { deleteCached } from "../utils/cache.js";
 
 dotenv.config();
 
@@ -43,6 +44,9 @@ export function attachWorkerEvents(io, clients) {
 
         await updateUserStreak(userId);
         await updateUserActivity(userId);
+
+        await deleteCached(`cache:user:${userId}:info`);
+
       } else {
         const existingSolution = await SolutionModel.findById(solutionId).select("result");
 

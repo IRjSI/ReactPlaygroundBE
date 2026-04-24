@@ -3,7 +3,6 @@ import UserModel from "../models/user.model.js";
 import ActivityModel from "../models/activity.model.js";
 import { enqueueSolution } from "../utils/queue.js";
 
-
 const MS_PER_DAY = 24 * 60 * 60 * 1000;
 
 const startOfUtcDay = (date = new Date()) => {
@@ -21,8 +20,8 @@ const startOfUtcDay = (date = new Date()) => {
 }
 */
 const checkSolution = async (req, res) => {
-  const { iframeDoc, validatorKey, challengeId } = req.body;
-  
+  const { iframeDoc, challengeId } = req.body;
+
   const userId = req.user?._id;
 
   const solution = await SolutionModel.findOneAndUpdate(
@@ -37,8 +36,9 @@ const checkSolution = async (req, res) => {
     },
     { new: true, upsert: true }
   );
- 
-  await enqueueSolution(solution._id.toString(), iframeDoc, validatorKey, challengeId, userId);
+
+  await enqueueSolution(solution._id.toString(), iframeDoc, challengeId, userId);
+
   return res.json({ solutionId: solution._id });
 };
 
