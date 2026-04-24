@@ -1,6 +1,8 @@
 import ActivityModel from "../models/activity.model.js";
 import SolutionModel from "../models/solution.model.js";
 import UserModel from "../models/user.model.js";
+import { getCached, setCached } from "../utils/cache.js";
+import { getRedisClient } from "../utils/redis.js";
 
 const userRegister = async (req,res) => {
     // to create a new user
@@ -84,8 +86,24 @@ const userLogin = async (req,res) => {
 const getUserInfo = async (req,res) => {
     // to get the current user
     try {
-        const userId = req.user?._id;
-        const user = await UserModel.findById(userId);
+        const userId = req.user?._id.toString();
+
+        // cache key
+        const cacheKey = `cache:user:${userId}:info`;
+
+        const cachedUserData = await getCached(cacheKey);
+        
+        if (cachedUserData) {
+            return res.status(200).json({
+                data: cachedUserData,
+                message: 'user found',
+                success: true
+            });
+        }
+        
+        // else 
+
+        const user = await UserModel.findById(userId).lean();
         if (!user) {
             return res.status(404).json({
                 message: 'user not found',
@@ -93,14 +111,19 @@ const getUserInfo = async (req,res) => {
             })
         }
 
-        const userActivity = await ActivityModel.find({ userId });
-        const noOfChallenges = await SolutionModel.countDocuments({ user });
+        const [userActivity, noOfChallenges] = await Promise.all([
+            ActivityModel.find({ userId }).lean(),
+            SolutionModel.countDocuments({ user: userId, result: "valid" })
+        ]);
 
         const userData = {
             user,
             userActivity,
             noOfChallenges
         }
+
+        // set in redis
+        await setCached(cacheKey, userData, 300);
 
         res.status(200).json({
             data: userData,

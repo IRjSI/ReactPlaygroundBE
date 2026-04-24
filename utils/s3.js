@@ -7,6 +7,7 @@ configDotenv();
 console.log("process.env.AWS_REGION", process.env.AWS_REGION)
 console.log("process.env.AWS_Access", process.env.AWS_ACCESS_KEY)
 console.log("process.env.AWS_Secret", process.env.AWS_SECRET_KEY)
+console.log("process.env.NODE_ENV", process.env.NODE_ENV)
 
 export const s3 = new S3Client({
   region: process.env.AWS_REGION,

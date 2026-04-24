@@ -1,2 +1,5 @@
 /.env
 /node_modules
+listChallenges.js
+migrateValidators.js
+seedNewChallenges.js

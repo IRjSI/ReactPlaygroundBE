@@ -3,27 +3,16 @@ dotenv.config();
 
 import puppeteer from "puppeteer";
 import * as Babel from '@babel/standalone';
-import fs from "fs";
-import path from "path";
-import { fileURLToPath } from "url";
 import { Worker } from "bullmq";
+import ChallengeModel from "../models/challenge.model.js";
+import { connectToDB } from "../db/config.js";
 
-// Convert ES module URL to file path
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
+// Connect to MongoDB
+connectToDB();
 
-const validatorsDir = path.join(__dirname, "../validators");
-const validators = {};
-if (fs.existsSync(validatorsDir)) {
-  const validatorFiles = fs.readdirSync(validatorsDir);
-  for (const file of validatorFiles) {
-    const challengeKey = path.basename(file, ".js"); // e.g., "challenge2Validator"
-    validators[challengeKey] = (await import(`file://${path.join(validatorsDir, file)}`)).default;
-  }
-  console.log("Loaded validators:", Object.keys(validators));
-} else {
-  console.warn("Validators folder not found:", validatorsDir);
-}
+// AsyncFunction constructor for dynamic code execution
+const AsyncFunction = Object.getPrototypeOf(async function () { }).constructor;
+
 
 async function launchBrowser() {
   try {
@@ -64,13 +53,24 @@ async function launchBrowser() {
 
 const browser = await launchBrowser()
 
-console.log("🚀 WORKER CREATED");
+console.log("WORKER CREATED");
 
 export const worker = new Worker("solutions", async (job) => {
-  const { solutionId, validatorKey, iframeDoc, challengeId, userId } = job.data;
+  const { solutionId, iframeDoc, challengeId, userId } = job.data;
 
   // compile JSX → plain JS
-  const compiledCode = Babel.transform(iframeDoc, { presets: ['react'] }).code;
+  let compiledCode = "";
+  try {
+    compiledCode = Babel.transform(iframeDoc, { presets: ['react'] }).code;
+  } catch (err) {
+    console.error("Babel transform error:", err.message);
+    return {
+      solutionId,
+      challengeId,
+      userId,
+      result: "invalid"
+    };
+  }
 
   // create HTML scaffold to run the React app
   const html = `
@@ -109,18 +109,19 @@ export const worker = new Worker("solutions", async (job) => {
 
   console.log("reached validity check")
 
-  console.log(validatorKey)
-
   // for other challenges
   try {
-    console.log("validators::", validators);
-    console.log("validators challengeId::", validators[validatorKey]);
-    if (validators[validatorKey]) {
-      isValid = await validators[validatorKey](page); //eg. validateChallenge2(page)
+    const validator = await ChallengeModel.findById(challengeId).select("validatorCode");
+
+    if (validator && validator.validatorCode) {
+      const validateFn = new AsyncFunction("page", validator.validatorCode);
+      isValid = await validateFn(page);
       console.log("isValid:", isValid);
     } else {
-      console.warn(`No validator found for ${validatorKey}, marking invalid`);
+      console.warn(`No validator found for ${challengeId}, marking invalid`);
     }
+
+
   } catch (err) {
     console.error("Validator error:", err.message);
   }

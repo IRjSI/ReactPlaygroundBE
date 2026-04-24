@@ -10,8 +10,8 @@ console.log(process.env.GOOGLE_CALLBACK_URL)
 passport.use(
   new GoogleStrategy(
     {
-      clientID: process.env.GOOGLE_CLIENT_ID,
-      clientSecret: process.env.GOOGLE_CLIENT_SECRET,
+      clientID: process.env.NODE_ENV === "dev" ? process.env.GOOGLE_CLIENT_ID_DEV : process.env.GOOGLE_CLIENT_ID,
+      clientSecret: process.env.NODE_ENV === "dev" ? process.env.GOOGLE_CLIENT_SECRET_DEV : process.env.GOOGLE_CLIENT_SECRET,
       callbackURL: process.env.NODE_ENV === "dev" ? "http://localhost:4000/api/v1/auth/google/callback" : `${process.env.GOOGLE_CALLBACK_URL}`
     },
     async (accessToken, refreshToken, profile, done) => {

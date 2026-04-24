@@ -2,6 +2,8 @@ import SolutionModel from "../models/solution.model.js";
 import { uploadToS3 } from "../utils/s3.js";
 import { QueueEvents, Queue, Job } from "bullmq";
 import dotenv from "dotenv";
+import { updateUserStreak, updateUserActivity } from "../controllers/submission.controller.js";
+import { deleteCached } from "../utils/cache.js";
 
 dotenv.config();
 
@@ -13,7 +15,7 @@ const connection = {
   },
 };
 
-const queueEvents = new QueueEvents("solutions", { connection });
+const queueEvents = new QueueEvents("solutions", { connection }); // listener for job lifecycle events
 const solutionQueue = new Queue("solutions", { connection });
 
 console.log('worker events reached')
@@ -30,16 +32,29 @@ export function attachWorkerEvents(io, clients) {
       const { iframeDoc } = job.data;
       const key = `solutions/${userId}/${challengeId}.js`;
 
-      console.log('Uploading solution to S3:', key);
+      if (status === "valid") {
+        console.log('Uploading solution to S3:', key);
+        await uploadToS3(key, iframeDoc);
 
-      // Save to S3 regardless of whether valid or invalid so user doesn't lose progress
-      await uploadToS3(key, iframeDoc);
+        const existingSolution = await SolutionModel.findByIdAndUpdate(solutionId, {
+          status: "completed",
+          result: status,
+          solution: key
+        }, { new: false }).select("result");
 
-      await SolutionModel.findByIdAndUpdate(solutionId, {
-        status: "completed",
-        result: status,
-        solution: key
-      });
+        await updateUserStreak(userId);
+        await updateUserActivity(userId);
+
+        await deleteCached(`cache:user:${userId}:info`);
+
+      } else {
+        const existingSolution = await SolutionModel.findById(solutionId).select("result");
+
+        await SolutionModel.findByIdAndUpdate(solutionId, {
+          status: "completed",
+          ...(existingSolution?.result !== "valid" ? { result: status } : {}),
+        });
+      }
 
       if (socketId) {
         io.to(socketId).emit("solutionResult", {
