@@ -38,14 +38,14 @@ connectToDB();
 const app = express();
 
 app.use(cors({
-  origin: ["http://localhost:5173", "https://reactpg.vercel.app", "https://react-playground-git-solution-rjss-projects.vercel.app"],
-  methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"], 
+  origin: ["http://localhost:5173", "https://reactpg.xyz", "https://reactpg.vercel.app", "https://react-playground-git-solution-rjss-projects.vercel.app"],
+  methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
   credentials: true
 }));
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json())
 
-app.get("/", (_,res) => {
+app.get("/", (_, res) => {
   res.send("restening")
 })
 
@@ -70,7 +70,7 @@ app.get(
     );
 
     // redirect to frontend with token or send JSON
-    res.redirect(process.env.NODE_ENV === "dev" ? `http://localhost:5173/auth/success?token=${token}` : `https://reactpg.vercel.app/auth/success?token=${token}`);
+    res.redirect(process.env.NODE_ENV === "dev" ? `http://localhost:5173/auth/success?token=${token}` : `https://reactpg.xyz/auth/success?token=${token}`);
   }
 );
 
@@ -85,8 +85,8 @@ const server = createServer(app);
 // Attach socket.io
 const io = new Server(server, {
   cors: {
-    origin: ["http://localhost:5173", "https://reactpg.vercel.app", "https://react-playground-git-solution-rjss-projects.vercel.app", "https://rpg-proxy.onrender.com"],
-    methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"], 
+    origin: ["http://localhost:5173", "https://reactpg.xyz", "https://reactpg.vercel.app", "https://react-playground-git-solution-rjss-projects.vercel.app", "https://rpg-proxy.onrender.com"],
+    methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
     credentials: true
   }
 });
