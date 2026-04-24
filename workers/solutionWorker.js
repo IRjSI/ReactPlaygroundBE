@@ -112,7 +112,6 @@ export const worker = new Worker("solutions", async (job) => {
   // for other challenges
   try {
     const validator = await ChallengeModel.findById(challengeId).select("validatorCode");
-    console.log(validator);
 
     if (validator && validator.validatorCode) {
       const validateFn = new AsyncFunction("page", validator.validatorCode);
