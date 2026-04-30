@@ -8,6 +8,10 @@ export const getRedisClient = createClient({
   socket: {
     tls: true,
     rejectUnauthorized: false,
+    reconnectStrategy: (retries) => {
+      console.log("Retrying Redis:", retries);
+      return Math.min(retries * 100, 3000);
+    }
   },
 });
 
