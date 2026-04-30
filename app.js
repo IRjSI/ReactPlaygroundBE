@@ -85,7 +85,7 @@ const server = createServer(app);
 // Attach socket.io
 const io = new Server(server, {
   cors: {
-    origin: ["http://localhost:5173", "https://reactpg.xyz", "https://reactpg.vercel.app", "https://react-playground-git-solution-rjss-projects.vercel.app", "https://rpg-proxy.onrender.com"],
+    origin: ["http://localhost:5173", "https://reactpg.xyz", "https://reactpg.vercel.app", "https://react-playground-git-solution-rjss-projects.vercel.app", "https://rpg-proxy.onrender.com", "https://api.reactpg.xyz"],
     methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
     credentials: true
   }
