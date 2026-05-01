@@ -293,3 +293,29 @@ Initially, the project used raw Redis Pub/Sub to manage the background worker fl
 2. **Workers:** `solutionWorker.js` automatically picks up jobs and processes the React code using Puppeteer.
 3. **Queue Events:** The backend uses BullMQ's `QueueEvents` (in `workerEvents.js`) to natively listen for `'completed'` and `'failed'` events.
 4. **WebSocket Sync:** Upon the `'completed'` event, the backend resolves the initial job, conditionally updates the MongoDB status, uploads the valid/invalid code logic to S3, and seamlessly emits the final outcome back to the React UI via Socket.io.
+
+---
+
+# Redis Client Enhancements
+
+Building upon our Redis usage, we have enhanced our Redis client configuration to handle production environments more gracefully.
+
+## TLS and Reconnection Strategy
+
+When connecting to managed Redis instances in production (which often use `rediss://` for secure connections), strict TLS requirements can cause connection failures. Furthermore, network blips can cause the app to lose its connection to Redis.
+
+To solve this, we updated our Redis client initialization (`utils/redis.js`):
+- **TLS Configuration:** Enabled `tls: true` and `rejectUnauthorized: false` to allow secure connections without certificate validation errors.
+- **Auto-Reconnect:** Added a `reconnectStrategy` that automatically attempts to reconnect with an exponential backoff (up to 3000ms), ensuring the server remains resilient if Redis temporarily goes down.
+- **Lifecycle Logs:** Added event listeners (`connect`, `ready`, `reconnecting`, `error`) to provide better visibility into the Redis connection lifecycle.
+
+## Caching Layer
+
+Beyond using Redis for Pub/Sub and BullMQ, we are now utilizing it for **caching**. 
+We've introduced utility functions (`getCached`, `setCached`, `deleteCached` in `utils/cache.js`) to store and retrieve frequently accessed data. This significantly reduces the load on our MongoDB database and speeds up response times for our users.
+
+---
+
+# Socket.IO CORS Update
+
+To support our new production API subdomain, `https://api.reactpg.xyz` has been added to the allowed origins in our Socket.IO CORS configuration. This ensures seamless real-time WebSocket communication between the frontend and the new API endpoint.
