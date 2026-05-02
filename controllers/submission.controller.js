@@ -13,7 +13,6 @@ const startOfUtcDay = (date = new Date()) => {
   ));
 };
 
-
 /* Response
 {
   solutionId: string,
