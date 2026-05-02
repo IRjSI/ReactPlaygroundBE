@@ -17,7 +17,7 @@ const UserSchema = new mongoose.Schema({
     },
     provider: {
         type: String,
-        enum: ["local", "google"]
+        enum: ["local", "google",]
     },
     providerId: {
         type: String
@@ -33,22 +33,27 @@ const UserSchema = new mongoose.Schema({
         longest: { type: Number, default: 0 },
         lastSolvedDate: { type: Date, default: null }
     },
+    badges: {
+        type: [String],
+        default: [],
+        enum: ["early_player",]
+    },
 }, { timestamps: true });
 
 UserSchema.pre("save", async function (next) {
     if (!this.isModified("password") || !this.password) return next();
-    
+
     // if the password is changed, it will be hashed. otherwise skipped
     this.password = await bcrypt.hash(this.password, 10);
-    
+
     next()
 })
 
-UserSchema.methods.isPasswordCorrect = async function(password) {
+UserSchema.methods.isPasswordCorrect = async function (password) {
     return await bcrypt.compare(password, this.password);
 }
 
-UserSchema.methods.generateToken = function() {
+UserSchema.methods.generateToken = function () {
     return jwt.sign({
         _id: this._id
     }, process.env.JWT_SECRET)

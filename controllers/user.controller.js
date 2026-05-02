@@ -4,7 +4,7 @@ import UserModel from "../models/user.model.js";
 import { getCached, setCached } from "../utils/cache.js";
 import { getRedisClient } from "../utils/redis.js";
 
-const userRegister = async (req,res) => {
+const userRegister = async (req, res) => {
     // to create a new user
     try {
         const { username, email, password } = req.body;
@@ -14,7 +14,7 @@ const userRegister = async (req,res) => {
                 success: false
             })
         }
-        
+
         const existingUser = await UserModel.findOne({ username });
         if (existingUser) {
             console.log(existingUser)
@@ -23,7 +23,7 @@ const userRegister = async (req,res) => {
                 success: false
             })
         }
-        
+
         const newUser = await UserModel.create({
             username,
             email,
@@ -31,7 +31,7 @@ const userRegister = async (req,res) => {
         })
 
         const token = await newUser.generateToken();
-        
+
         if (newUser) {
             return res.status(201).json({
                 data: token,
@@ -48,7 +48,7 @@ const userRegister = async (req,res) => {
     }
 }
 
-const userLogin = async (req,res) => {
+const userLogin = async (req, res) => {
     // to login an existing user
     try {
         const { username, password } = req.body;
@@ -58,7 +58,7 @@ const userLogin = async (req,res) => {
                 success: false
             })
         }
-        
+
         const existingUser = await UserModel.findOne({ username });
         if (!existingUser) {
             return res.status(400).json({
@@ -68,7 +68,7 @@ const userLogin = async (req,res) => {
         }
 
         const token = await existingUser.generateToken();
-        
+
         return res.status(200).json({
             data: token,
             message: "User found",
@@ -83,7 +83,7 @@ const userLogin = async (req,res) => {
     }
 }
 
-const getUserInfo = async (req,res) => {
+const getUserInfo = async (req, res) => {
     // to get the current user
     try {
         const userId = req.user?._id.toString();
@@ -92,7 +92,7 @@ const getUserInfo = async (req,res) => {
         const cacheKey = `cache:user:${userId}:info`;
 
         const cachedUserData = await getCached(cacheKey);
-        
+
         if (cachedUserData) {
             return res.status(200).json({
                 data: cachedUserData,
@@ -100,7 +100,7 @@ const getUserInfo = async (req,res) => {
                 success: true
             });
         }
-        
+
         // else 
 
         const user = await UserModel.findById(userId).lean();

@@ -3,3 +3,4 @@
 listChallenges.js
 migrateValidators.js
 seedNewChallenges.js
+utils/giveBadge.js
