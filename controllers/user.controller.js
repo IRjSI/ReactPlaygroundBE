@@ -9,13 +9,13 @@ const userRegister = async (req, res) => {
     try {
         const { username, email, password } = req.body;
         if (!username || !email || !password) {
-            return res.status(400).json(400, {
+            return res.status(400).json({
                 message: "All fields required",
                 success: false
             })
         }
 
-        const existingUser = await UserModel.findOne({ username });
+        const existingUser = await UserModel.findOne({ email });
         if (existingUser) {
             console.log(existingUser)
             return res.status(400).json({
@@ -27,7 +27,8 @@ const userRegister = async (req, res) => {
         const newUser = await UserModel.create({
             username,
             email,
-            password
+            password,
+            provider: "local"
         })
 
         const token = await newUser.generateToken();
@@ -51,18 +52,26 @@ const userRegister = async (req, res) => {
 const userLogin = async (req, res) => {
     // to login an existing user
     try {
-        const { username, password } = req.body;
-        if (!username || !password) {
+        const { email, password } = req.body;
+        if (!email || !password) {
             return res.status(400).json({
                 message: "All fields required",
                 success: false
             })
         }
 
-        const existingUser = await UserModel.findOne({ username });
+        const existingUser = await UserModel.findOne({ email });
         if (!existingUser) {
             return res.status(400).json({
-                message: "User does not exists",
+                message: "User does not exist",
+                success: false
+            })
+        }
+
+        const isPasswordValid = await existingUser.isPasswordCorrect(password);
+        if (!isPasswordValid) {
+            return res.status(400).json({
+                message: "Invalid credentials",
                 success: false
             })
         }
