@@ -62,7 +62,7 @@ app.get(
 
     const token = jwt.sign(
       {
-        id: user._id,
+        _id: user._id,
         email: user.email
       },
       process.env.JWT_SECRET,
