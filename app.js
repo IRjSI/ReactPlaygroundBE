@@ -22,12 +22,14 @@ import submissionRouter from "./routes/submission.route.js";
 import { fork } from "child_process";
 import path from "path";
 import { fileURLToPath } from "url";
+
 import { attachWorkerEvents } from "./workers/workerEvents.js";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 const workerPath = path.join(__dirname, "workers", "solutionWorker.js");
+
 const worker = fork(workerPath);
 
 worker.on("error", (err) => console.error("Worker error:", err));
