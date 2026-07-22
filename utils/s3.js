@@ -4,6 +4,7 @@ import { configDotenv } from "dotenv";
 
 configDotenv();
 
+console.log("process.env.S3_ENDPOINT", process.env.S3_ENDPOINT)
 console.log("process.env.AWS_REGION", process.env.AWS_REGION)
 console.log("process.env.AWS_Access", process.env.AWS_ACCESS_KEY)
 console.log("process.env.AWS_Secret", process.env.AWS_SECRET_KEY)
