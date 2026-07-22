@@ -10,11 +10,13 @@ console.log("process.env.AWS_Secret", process.env.AWS_SECRET_KEY)
 console.log("process.env.NODE_ENV", process.env.NODE_ENV)
 
 export const s3 = new S3Client({
+  endpoint: process.env.S3_ENDPOINT,
   region: process.env.AWS_REGION,
   credentials: {
     accessKeyId: process.env.AWS_ACCESS_KEY,
     secretAccessKey: process.env.AWS_SECRET_KEY,
   },
+  forcePathStyle: true,
 });
 
 export async function uploadToS3(key, body) {

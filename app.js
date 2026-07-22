@@ -37,7 +37,7 @@ worker.on("exit", (code) => console.log("Worker exited with code", code));
 
 connectToDB();
 
-const app = express();
+export const app = express();
 
 app.use(cors({
   origin: ["http://localhost:5173", "https://reactpg.xyz", "https://reactpg.vercel.app", "https://react-playground-git-solution-rjss-projects.vercel.app"],
